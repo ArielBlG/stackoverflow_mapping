@@ -1,8 +1,7 @@
 import javalang
 import pandas as pd
-import csv
-import MapCreator
 import stackoverflow_java_queries
+from CodeMapping import MapCreator
 import json
 
 
@@ -18,7 +17,7 @@ def Main():
     LIMIT 10000
                       """
 
-    #creates the datacollector
+    """creates the datacollector"""
 
     # datacollector = stackoverflow_java_queries.dataCollector(r'Cred.json')
     # datacollector.openclient()
@@ -26,19 +25,18 @@ def Main():
     # data_set.to_csv('df.csv')
 
 
-    #data_set = pd.read_csv('df2.csv', encoding="ISO-8859-1")
-    # data_set['codes'] = data_set['body'] + data_set['answers_body']
     # data_set.to_csv('df2.csv')
+    data_set = pd.read_csv('df2.csv', encoding="ISO-8859-1")
 
-    #codeextractor = stackoverflow_java_queries.codeExtractor(data_set)
+    codeextractor = stackoverflow_java_queries.codeExtractor(data_set)
 
-    # optional -- recevie a csv file instead of panda df
+    """optional -- recevie a csv file instead of panda df"""
     # codeextractor = codeExtractor(%PATH%)
 
+    codes = codeextractor.extractCodes()
 
-    #codes = codeextractor.extractCodes()
-
-    list_codes = []
+    """test a single code to map"""
+    # list_codes = []
     code = """
     /** recursive dfs class */
     public class Dfs extends Recursive implements Search,GraphSeach {
@@ -84,23 +82,17 @@ def Main():
     # df2 = pd.DataFrame([["dfs", "aaaaa", list_codes]], columns=['title', 'text', 'code'])
     # code_dict = pd.concat([df2, code_dict])
 
-    # codeparser = stackoverflow_java_queries.codeParser(codes)
-    # mapped_code = codeparser.parse_code()
-    # # #
-    # map_code = MapCreator.MapCreater(mapped_code)
-    # task_dict = map_code.create_dictionary()
+
+    codeparser = stackoverflow_java_queries.codeParser(codes)
+    mapped_code = codeparser.parse_code()
+
+    map_code = MapCreator.MapCreator(mapped_code)
+    task_dict = map_code.create_dictionary()
     # print("done")
-    # with open("sample_1.json", 'w') as outfile:
-    #     json.dump(task_dict[0], outfile)
-    # with open("sample_2.json", 'w') as outfile:
-    #     json.dump(task_dict[1], outfile)
-    code = """public void NaryTreeNode(String LABEL, int n) {
-        String temp = LABEL;
-        int N = n;
-    }"""
-    tokens = javalang.tokenizer.tokenize(code)
-    parser = javalang.parser.Parser(tokens)
-    ast = parser.parse_expression()
+    with open("sample_1.json", 'w') as outfile:
+        json.dump(task_dict[0], outfile)
+    with open("sample_2.json", 'w') as outfile:
+        json.dump(task_dict[1], outfile)
 
 
 if __name__ == "__main__":

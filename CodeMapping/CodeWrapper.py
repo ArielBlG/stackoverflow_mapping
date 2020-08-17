@@ -205,7 +205,7 @@ class ClassAttribute(Task):
         :param class_task:
         :param attribute_name:
         """
-        super.__init__()
+        super().__init__()
         self.class_name = class_task
         self.name = attribute_name
 

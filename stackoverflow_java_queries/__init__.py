@@ -3,7 +3,7 @@ import re
 import pandas as pd
 import javalang
 from google.cloud import bigquery
-import CodeWrapper
+from CodeMapping import CodeWrapper
 
 primitive_types = ['Boolean', 'boolean', 'char', 'byte', 'short', 'int', 'long', 'float', 'double', 'String', 'string',
                    'System', 'System.out', 'Scanner', 'Log']
