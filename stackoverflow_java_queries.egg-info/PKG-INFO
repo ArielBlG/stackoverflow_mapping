@@ -1,0 +1,16 @@
+Metadata-Version: 2.1
+Name: stackoverflow-java-queries
+Version: 0.1.2
+Summary: Stack Overflow java queries
+Home-page: https://github.com/ArielBlG/stackoverflow_java_queries
+Author: Ariel
+Author-email: arielblobstein@gmail.com
+License: UNKNOWN
+Description: # stackoverflow_java_queries
+        
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown

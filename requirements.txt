@@ -1,0 +1,4 @@
+django-googlesearch
+javalang
+pandas
+google-cloud-bigquery

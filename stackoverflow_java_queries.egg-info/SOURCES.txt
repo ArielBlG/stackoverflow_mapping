@@ -1,0 +1,8 @@
+README.md
+setup.py
+stackoverflow_java_queries/__init__.py
+stackoverflow_java_queries.egg-info/PKG-INFO
+stackoverflow_java_queries.egg-info/SOURCES.txt
+stackoverflow_java_queries.egg-info/dependency_links.txt
+stackoverflow_java_queries.egg-info/requires.txt
+stackoverflow_java_queries.egg-info/top_level.txt
