@@ -26,73 +26,122 @@ def Main():
 
 
     # data_set.to_csv('df2.csv')
-    data_set = pd.read_csv('df2.csv', encoding="ISO-8859-1")
+    # data_set = pd.read_csv('df2.csv', encoding="ISO-8859-1")
 
-    codeextractor = stackoverflow_java_queries.codeExtractor(data_set)
+    # codeextractor = stackoverflow_java_queries.codeExtractor(data_set)
 
     """optional -- recevie a csv file instead of panda df"""
     # codeextractor = codeExtractor(%PATH%)
 
-    codes = codeextractor.extractCodes()
+    # codes = codeextractor.extractCodes()
 
     """test a single code to map"""
-    # list_codes = []
-    code = """
-    /** recursive dfs class */
-    public class Dfs extends Recursive implements Search,GraphSeach {
-    private int search_number;
-    /** main function*/
-    public static void main(String[] args) {
-        int[][] arr = {
-                // 1 2 3 4 5 6 7 8 9 10
-                { 0, 1, 1, 1, 0, 0, 0, 0, 0, 0 }, // 1
-                { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0 }, // 2
-                { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, // 3
-                { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 }, // 4
-                { 0, 0, 0, 0, 0, 1, 0, 0, 0, 0 }, // 5
-                { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, // 6
-                { 0, 0, 0, 0, 0, 0, 0, 1, 1, 0 }, // 7
-                { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, // 8
-                { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // 9
-                { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } // 10
-        };
-        boolean [] visited = new boolean[10];
+    code = """import java.io.*;
+import java.util.*;
+//try
+interface dataStructure{
 
-        dfs(0, arr, visited);
-
-    }
-    /** recursive DFS function*/
-    public static void dfs(int i, int[][] mat, boolean[] visited) {
-        if(!visited[i]) {
-            visited[i] = true; // Mark node as "visited"
-            System.out.print( (i+1) + " ");
-
-            for (int j = 0; j < mat[i].length; j++) {
-                if (mat[i][j] == 1 && !visited[j]) {
-                    dfs(j, mat, visited); // Visit node
-                }
-            }
+}
+/** code search for the graph */
+class Search{
+    public void activate_search(String search_name, Graph g, int v){
+        if(search_name.equals("DFS")){
+            DFS dfs = new DFS();
+            dfs.DFS(v,g);
         }
     }
-}"""
+}
+class DFS extends Search{
+    static Graph graph;
+    /**A function used by DFS */
+    void DFSUtil(int v,boolean visited[])
+
+    {
+        visited[v] = true;
+        System.out.print(v+" ");
+
+        Iterator<Integer> i = graph.adj[v].listIterator();
+        while (i.hasNext())
+        {
+            int n = i.next();
+            if (!visited[n])
+                DFSUtil(n, visited);
+        }
+    }
+
+    /**The function to do DFS traversal. It uses recursive DFSUtil() */
+    void DFS(int v, Graph g)
+    {
+        graph = g;
+        boolean visited[] = new boolean[g.getV()];
+
+        DFSUtil(v, visited);
+    }
+}
+public class Graph implements dataStructure{
+    private int V;
+    public LinkedList<Integer> adj[];
+
+    public LinkedList<Integer>[] get_adj(){
+        return this.adj;
+    }
+    public int getV(){
+        return this.V;
+    }
+    /** constructor*/
+    Graph(int v)
+    {
+        V = v;
+        adj = new LinkedList[v];
+        for (int i=0; i<v; ++i)
+            adj[i] = new LinkedList();
+    }
+
+    /**Function to add an edge into the graph*/
+    void addEdge(int v, int w)
+    {
+        adj[v].add(w);  // Add w to v's list.
+    }
+
+
+    /** main class */
+    public static void main(String[] args) {
+        Graph g = new Graph(4);
+
+        g.addEdge(0, 1);
+        g.addEdge(0, 2);
+        g.addEdge(1, 2);
+        g.addEdge(2, 0);
+        g.addEdge(2, 3);
+        g.addEdge(3, 3);
+
+        System.out.println("Following is Depth First Traversal "+
+                "(starting from vertex 2)");
+
+        Search search = new Search();
+        search.activate_search("DFS", g,2);
+    }
+}
+"""
     # parse the code
-    # list_codes = []
-    # list_codes.append(code)
-    # code_dict = pd.DataFrame(columns=['title', 'text', 'code'])
-    # df2 = pd.DataFrame([["dfs", "aaaaa", list_codes]], columns=['title', 'text', 'code'])
-    # code_dict = pd.concat([df2, code_dict])
+    list_codes = []
+    list_codes.append(code)
+    code_dict = pd.DataFrame(columns=['title', 'text', 'code'])
+    df2 = pd.DataFrame([["Recursive DFS implementation java", "implementation of DFS including graph", list_codes]], columns=['title', 'text', 'code'])
+    code_dict = pd.concat([df2, code_dict])
 
 
-    codeparser = stackoverflow_java_queries.codeParser(codes)
+    codeparser = stackoverflow_java_queries.codeParser(code_dict)
+    # codeparser = stackoverflow_java_queries.codeParser(codes)
     mapped_code = codeparser.parse_code()
 
     map_code = MapCreator.MapCreator(mapped_code)
     task_dict = map_code.create_dictionary()
-    # print("done")
+    print("done")
     with open("sample_1.json", 'w') as outfile:
         json.dump(task_dict[0], outfile)
-    with open("sample_2.json", 'w') as outfile:
-        json.dump(task_dict[1], outfile)
+    # with open("sample_2.json", 'w') as outfile:
+    #     json.dump(task_dict[1], outfile)
 
 
 if __name__ == "__main__":

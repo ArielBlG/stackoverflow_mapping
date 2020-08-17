@@ -94,7 +94,7 @@ class MapCreator:
             key, full_task_dict = self.create_method_tasks(code, full_task_dict, key)
 
             """extract the class's attributes"""
-            key, full_task_dict = self.create_attribute_tasks(code, full_task_dict, key)
+            # key, full_task_dict = self.create_attribute_tasks(code, full_task_dict, key)
 
             """extract the calling methods"""
             key, full_task_dict = self.add_calling_methods(code, full_task_dict, key)

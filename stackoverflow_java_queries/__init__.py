@@ -7,7 +7,7 @@ from CodeMapping import CodeWrapper
 
 primitive_types = ['Boolean', 'boolean', 'char', 'byte', 'short', 'int', 'long', 'float', 'double', 'String', 'string',
                    'System', 'System.out', 'Scanner', 'Log']
-system_methods = ['System', 'System.out', 'Scanner', 'Log']
+# system_methods = ['System', 'System.out', 'Scanner', 'Log']
 
 
 class codeExtractor():
@@ -70,7 +70,19 @@ class codeParser():
         self.all_codes = code_dict
         self.counter_succeded_queries = 0
         self.mapped_code = []
+        self.system_methods = []
+        self.get_system_methods()
 
+    def get_system_methods(self):
+        """
+        get_system_methods Function - extract all system methods
+        :return:
+        """
+        fin = open("/Users/ariel-pc/Desktop/Package/java_classes_names.txt", "rt")
+        for line in fin:
+            line = line.replace('\n', '')
+            self.system_methods.append(line)
+        fin.close()
     def parse_code(self):
         """
         parseCode Function - Parse each query and each code inside the query code list.
@@ -108,13 +120,18 @@ class codeParser():
 
         for class_extract in tree.types:
             """adds the calls name and create task object"""
-            current_class = CodeWrapper.ClassTask(class_extract.name)
-            current_query.add_class(current_class)
+            current_class = current_query.get_class(class_extract.name)
+            if current_class is None:
+                current_class = CodeWrapper.ClassTask(class_extract.name)
+                current_query.add_class(current_class)
 
             """extract class comments"""
             if class_extract.documentation is not None:
-                for documentation in class_extract.documentation:
-                    current_class.set_documentation(documentation)
+                if isinstance(class_extract.documentation,list):
+                    for documentation in class_extract.documentation:
+                        current_class.set_documentation(documentation)
+                else:
+                    current_class.set_documentation(class_extract.documentation)
 
             if not isinstance(class_extract, javalang.tree.AnnotationDeclaration):
 
@@ -146,13 +163,18 @@ class codeParser():
 
                 """adds the class methods to the task"""
                 for method in class_extract.methods:
-                    current_method = CodeWrapper.MethodTask(method.name, current_class)
-                    current_class.add_class_methods(current_method)
+                    current_method = current_class.get_class_method(method.name)
+                    if current_method is None:
+                        current_method = CodeWrapper.MethodTask(method.name, current_class)
+                        current_class.add_class_methods(current_method)
 
                     """adds the method comments"""
                     if method.documentation is not None:
-                        for documentation in method.documentation:
-                            current_method.set_documentation(documentation)
+                        if isinstance(method.documentation,list):
+                            for documentation in method.documentation:
+                                current_method.set_documentation(documentation)
+                        else:
+                            current_method.set_documentation(method.documentation)
 
                     """add method parameters for function calls"""
                     self.extract_method_parameters(method.parameters, current_method, current_query)
@@ -254,6 +276,8 @@ class codeParser():
             self.super_constructor_call(current_method)
             return
 
+        method = None
+        qualifier = None
         qualifier_name = expression.qualifier
         method_name = expression.member
 
@@ -285,6 +309,8 @@ class codeParser():
                 qualifier.add_class_methods(method)
                 current_method.add_method_calls(method)
                 return
+            """update method call"""
+            current_method.add_method_calls(method)
 
         else:
             current_attribute = current_method.get_attribute(qualifier_name)
@@ -293,11 +319,21 @@ class codeParser():
                 qualifier = current_attribute.get_attribute_class()
                 method = qualifier.get_class_method(method_name)
                 if method is None:
-                    method = CodeWrapper.MethodTask(method_name, qualifier)
-                    qualifier.add_class_methods(method)
+                    #TODO: check if deleted more than should
+                    """check if the method invoke is a system method"""
+                    if qualifier.get_class_name() in self.system_methods or qualifier.class_name in primitive_types:
+                        """save system methods calling in case"""
+                        # method = CodeWrapper.MethodTask(method_name, qualifier)
+                        # qualifier.add_class_methods(method)
+                        return
+                    else:
+                        method = CodeWrapper.MethodTask(method_name, qualifier)
+                        qualifier.add_class_methods(method)
+                """update method call"""
+                current_method.add_method_calls(method)
             else:
                 """checks if the variable name is system call"""
-                if qualifier_name not in system_methods:
+                if qualifier_name not in self.system_methods and qualifier_name not in primitive_types:
                     qualifier_class_attribute = current_method.get_method_super_class().get_specific_attribute(
                         qualifier_name)
                     if qualifier_class_attribute is None:  # TODO: check if relevant
@@ -311,10 +347,9 @@ class codeParser():
                         if method is None:
                             method = CodeWrapper.MethodTask(method_name, qualifier_class_attribute)
                             qualifier_class_attribute.get_attribute_class().add_class_methods(method)
-                else:
-                    return
-        """update method call"""
-        current_method.add_method_calls(method)
+                    """update method call"""
+                    current_method.add_method_calls(method)
+
 
     def super_constructor_call(self, current_method):
         qualifier = current_method.get_method_super_class().Extends
@@ -331,7 +366,11 @@ class codeParser():
         """
         for parameter in parameters:
             """skips primitive parameters"""
-            if parameter.type.name in primitive_types:
+            # TODO: check if necessary
+            if parameter.type.name in primitive_types or parameter.type.name in self.system_methods:
+                current_class = CodeWrapper.ClassTask(parameter.type.name)
+                attribute = CodeWrapper.ClassAttribute(current_class, parameter.name)
+                method.add_method_attributes(attribute)
                 continue
 
             current_class = current_query.get_class(parameter.type.name)
@@ -368,25 +407,27 @@ class codeParser():
         """
         current_class = current_method.get_method_super_class()
         attribute = None
-        """skips primitive local declares"""
-        if declare_type in primitive_types:
-            return
-
+        """adds primitive local declares"""
+        # if declare_type in primitive_types or declare_type in self.system_methods:
+        #     return
         for declare in declarator:
             """checks if the local is from the same class of method"""
             if declare_type == current_class.get_class_name():
                 attribute = CodeWrapper.ClassAttribute(current_class, declare.name)
 
-            elif declare_type not in primitive_types:
+            elif declare_type not in primitive_types and declare_type not in self.system_methods:
                 class_to_add = current_query.get_class(declare_type)
                 """checks if the variable type class is already declared"""
-                if class_to_add is None and class_to_add not in system_methods:
+                if class_to_add is None:
                     new_class = CodeWrapper.ClassTask(declare_type)
                     current_query.add_class(new_class)
                     attribute = CodeWrapper.ClassAttribute(new_class, declare.name)
                     new_class.add_class_attributes(attribute)
                 else:
                     attribute = CodeWrapper.ClassAttribute(class_to_add, declare.name)
+            else:
+                new_class = CodeWrapper.ClassTask(declare_type)
+                attribute = CodeWrapper.ClassAttribute(new_class, declare.name)
 
         current_method.add_method_attributes(attribute)
 
@@ -403,8 +444,7 @@ class codeParser():
             attribute = CodeWrapper.ClassAttribute(current_class, declare.name)
             if attribute not in current_class.get_class_attributes():
                 current_class.add_class_attributes(attribute)
-            """skips primitive types"""
-        elif object_type not in primitive_types:
+        elif object_type not in primitive_types and object_type not in self.system_methods:
             # TODO: check the fields objects type
             class_to_add = current_query.get_class(object_type)
             """checks if the class of the variable is already mapped"""
