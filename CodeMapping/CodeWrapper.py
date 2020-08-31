@@ -11,6 +11,48 @@ class Task:
         self.task = None
         self.key = 0
         self.documentation = []
+        self.code = None
+        self.code_changed = False
+        self.imports = []
+        self.tags = []
+        self.score = None
+
+    def add_tags(self, tags):
+        """
+        add_tags Function - adds the query tags to the map
+        :param tags:
+        """
+        self.tags = tags
+
+    def add_score(self, score):
+        """
+        add_score Function - adds the score to the map
+        :param score:
+        """
+        self.score = score
+
+    def add_imports(self, _import):
+        """
+        add_imports Function - adds code imports to the class
+        :param _import:
+        :return:
+        """
+        self.imports.append(_import)
+
+    def changed_code(self):
+        """
+        changed_code Function - indicates that code has been changed
+        """
+        self.code_changed = True
+
+    def set_code(self, code):
+        """
+        set_code Function - sets the task's code
+        :param code:
+        """
+        if self.code is not None:
+            self.code_changed = True
+        self.code = code
 
     def set_documentation(self, documentation):
         """
@@ -43,8 +85,33 @@ class CodeWrapper(Task):
         super().__init__()
         self.query = query
         self.text = text
+        self.answer_text = None
         self.sub_classes = []
         self.url = None
+        self.methods = []
+
+    def add_answer_text(self, answer_text):
+        """
+        add_answer_text Function - adds the answer text to the query
+        :param answer_text:
+        """
+        self.answer_text = answer_text
+
+    def add_methods(self, method):
+        """
+        add_methods Function - creates methods list to find simple codes
+        :param method:
+        """
+        self.methods.append(method)
+
+    def get_methods(self, method_name):
+        """
+        get_methods Function - find if a method exists
+        :param method_name:
+        :return: list of methods
+        """
+        # TODO: handle two functions from same name
+        return next((x for x in self.methods if x.get_method_name() == method_name), None)
 
     def find_url(self):
         # TODO: to fix function
@@ -106,6 +173,15 @@ class ClassTask(Task):
         self.Implements = []
         self.Extends = None
         self.Constructors = []
+        self.sub_classes = []
+        self.Enums = []
+
+    def add_class_enums(self, enum):
+        """
+        add_class_enums Function - adds the class's enums declarations
+        :param enum:
+        """
+        self.Enums.append(enum)
 
     def add_implement_class(self, implement_class):
         """
@@ -187,6 +263,15 @@ class ClassTask(Task):
         """
         return self.Methods
 
+    def get_constructor(self):
+        """
+        get_constructor Function
+        :return first constructor
+        """
+        if self.Constructors:
+            return self.Constructors[0]
+        return None
+
     def __eq__(self, other):
         """
         equality checker for class task
@@ -199,7 +284,7 @@ class ClassTask(Task):
 # ------------------------------------------------------------------------------
 class ClassAttribute(Task):
 
-    def __init__(self, class_task, attribute_name):
+    def __init__(self, class_task, attribute_name, att_type=None, object_type=None):
         """
         ClassAttribute constructor - builds an attribute task object
         :param class_task:
@@ -208,6 +293,11 @@ class ClassAttribute(Task):
         super().__init__()
         self.class_name = class_task
         self.name = attribute_name
+        self.att_type = att_type
+        self.object_type = object_type
+
+    def get_att_obj_type(self):
+        return self.object_type
 
     def get_attribute_name(self):
         """
@@ -223,8 +313,28 @@ class ClassAttribute(Task):
         """
         return self.class_name
 
+    def get_attribute_type(self):
+        return self.att_type
+
 
 # ------------------------------------------------------------------------------
+
+class MultiTypeClassAttribute(ClassAttribute):
+
+    def __init__(self, class_task, attribute_name, att_types, object_type):
+        """
+        MultiTypeClassAttribute constructor - builds a multi types attribute task object
+        :param class_task:
+        :param attribute_name:
+        :param att_types:
+        :param object_type:
+        """
+        super().__init__(class_task, attribute_name, object_type=object_type)
+        self.types = att_types
+
+
+# ------------------------------------------------------------------------------
+
 class MethodTask(Task):
 
     def __init__(self, method_name, class_task):
@@ -237,6 +347,7 @@ class MethodTask(Task):
         self.Attributes = []
         self.method_name = method_name
         self.calling_methods = []
+        self.method_token = None
 
     def add_method_calls(self, method):
         """
@@ -290,3 +401,25 @@ class MethodTask(Task):
             if calling.get_method_name() == method_called:
                 return calling
         return None
+
+
+# ------------------------------------------------------------------------------
+
+class EnumTask(Task):
+
+    def __init__(self, enum_name, task):
+        """
+        MethodTask constructor - builds the method task object
+        :param method_name:
+        """
+        super().__init__()
+        self.enum_name = enum_name
+        self.super_task = task
+        self.enum_consts = []
+
+    def add_enum_const(self, const):
+        """
+        add_enum_const Function - adds the enum consts to the enum task
+        :param const:
+        """
+        self.enum_consts.append(const)
