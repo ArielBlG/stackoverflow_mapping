@@ -6,9 +6,10 @@ import json
 import plyj.parser as plyj
 import javac_parser
 from collections import namedtuple
-import os
+from os.path import dirname, join
 import csv
-TEST_FILENAME = os.path.join(os.path.dirname(__file__), 'Cred.json')
+temp_dir =dirname(dirname(__file__))
+CRED_FILENAME = join(temp_dir, 'Cred.json')
 Position = namedtuple('Position', ['line', 'column'])
 
 def extract_temp_mapped(mapped_code):
@@ -34,15 +35,14 @@ def Main():
 
     """creates the datacollector"""
     #
-    # datacollector = stackoverflow_java_queries.dataCollector(TEST_FILENAME)
+    # datacollector = stackoverflow_java_queries.dataCollector(CRED_FILENAME)
     # datacollector.openclient()
     # data_set = datacollector.getdataset(questions_query)  # get the data set created from the bigquery dataset
     # data_set.to_csv('df_score.csv')
 
 
     # data_set.to_csv('df2.csv')
-
-    data_set = pd.read_csv('df_score.csv', encoding="ISO-8859-1", nrows=800)
+    data_set = pd.read_csv(join(temp_dir, 'temp_datasets/df_score.csv'), encoding="ISO-8859-1", nrows=10)
     codeextractor = stackoverflow_java_queries.codeExtractor(data_set)
 
 
@@ -55,10 +55,6 @@ def Main():
     mapped_code = codeparser.parse_code_new()
     query_dict = extract_temp_mapped(mapped_code)
     # {k: v for k, v in sorted(query_dict.items(), key=lambda item: item[1])}
-    with open('temp_query.csv', 'w') as f:  # Just use 'w' mode in 3.x
-        w = csv.DictWriter(f, query_dict.keys())
-        w.writeheader()
-        w.writerow(query_dict)
     # map_code = MapCreator.MapCreator(mapped_code)
 
     # task_dict = map_code.create_dictionary(query='Simple Java calculator')
