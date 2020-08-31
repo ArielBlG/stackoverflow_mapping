@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="c893017e-cdc5-40da-a90f-185b97eae8bc" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectId" id="1gM5tcAjG5dPMpBDjufh4wQt7My" />
+  <component name="ProjectViewState">
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+  </component>
+  <component name="RunManager">
+    <configuration name="CodeDiagnostics" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="CodeDiagnostics" />
+      <module name="Diagnostics" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.CodeDiagnostics" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c893017e-cdc5-40da-a90f-185b97eae8bc" name="Default Changelist" comment="" />
+      <created>1597911836911</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1597911836911</updated>
+      <workItem from="1597911841955" duration="4334000" />
+      <workItem from="1598268839686" duration="163000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state width="1238" height="286" key="GridCell.Tab.0.bottom" timestamp="1597917792314">
+      <screen x="1440" y="0" width="1280" height="1024" />
+    </state>
+    <state width="1238" height="286" key="GridCell.Tab.0.bottom/0.0.1440.900/-1280.0.1280.1024/1440.0.1280.1024@1440.0.1280.1024" timestamp="1597917792314" />
+    <state width="1238" height="286" key="GridCell.Tab.0.center" timestamp="1597917792311">
+      <screen x="1440" y="0" width="1280" height="1024" />
+    </state>
+    <state width="1238" height="286" key="GridCell.Tab.0.center/0.0.1440.900/-1280.0.1280.1024/1440.0.1280.1024@1440.0.1280.1024" timestamp="1597917792311" />
+    <state width="1238" height="286" key="GridCell.Tab.0.left" timestamp="1597917792309">
+      <screen x="1440" y="0" width="1280" height="1024" />
+    </state>
+    <state width="1238" height="286" key="GridCell.Tab.0.left/0.0.1440.900/-1280.0.1280.1024/1440.0.1280.1024@1440.0.1280.1024" timestamp="1597917792309" />
+    <state width="1238" height="286" key="GridCell.Tab.0.right" timestamp="1597917792311">
+      <screen x="1440" y="0" width="1280" height="1024" />
+    </state>
+    <state width="1238" height="286" key="GridCell.Tab.0.right/0.0.1440.900/-1280.0.1280.1024/1440.0.1280.1024@1440.0.1280.1024" timestamp="1597917792311" />
+    <state width="1238" height="353" key="GridCell.Tab.1.bottom" timestamp="1597913206638">
+      <screen x="1440" y="0" width="1280" height="1024" />
+    </state>
+    <state width="1238" height="353" key="GridCell.Tab.1.bottom/0.0.1440.900/-1280.0.1280.1024/1440.0.1280.1024@1440.0.1280.1024" timestamp="1597913206638" />
+    <state width="1238" height="353" key="GridCell.Tab.1.center" timestamp="1597913206636">
+      <screen x="1440" y="0" width="1280" height="1024" />
+    </state>
+    <state width="1238" height="353" key="GridCell.Tab.1.center/0.0.1440.900/-1280.0.1280.1024/1440.0.1280.1024@1440.0.1280.1024" timestamp="1597913206636" />
+    <state width="1238" height="353" key="GridCell.Tab.1.left" timestamp="1597913206635">
+      <screen x="1440" y="0" width="1280" height="1024" />
+    </state>
+    <state width="1238" height="353" key="GridCell.Tab.1.left/0.0.1440.900/-1280.0.1280.1024/1440.0.1280.1024@1440.0.1280.1024" timestamp="1597913206635" />
+    <state width="1238" height="353" key="GridCell.Tab.1.right" timestamp="1597913206637">
+      <screen x="1440" y="0" width="1280" height="1024" />
+    </state>
+    <state width="1238" height="353" key="GridCell.Tab.1.right/0.0.1440.900/-1280.0.1280.1024/1440.0.1280.1024@1440.0.1280.1024" timestamp="1597913206637" />
+    <state x="399" y="282" key="com.intellij.ide.util.TipDialog" timestamp="1598268844551">
+      <screen x="0" y="23" width="1440" height="825" />
+    </state>
+    <state x="399" y="282" key="com.intellij.ide.util.TipDialog/0.23.1440.825@0.23.1440.825" timestamp="1598268844551" />
+    <state x="114" y="72" key="new project wizard" timestamp="1597988910777">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state x="114" y="72" key="new project wizard/0.0.1440.900@0.0.1440.900" timestamp="1597988910777" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/CodeDiagnostics.java</url>
+          <line>29</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <watches-manager>
+      <configuration name="Application">
+        <watch expression="((DiagnosticSourceUnwrapper)diagnostic).d" custom="com.sun.tools.javac.api.ClientCodeWrapper.DiagnosticSourceUnwrapper" />
+      </configuration>
+    </watches-manager>
+  </component>
+</project>
