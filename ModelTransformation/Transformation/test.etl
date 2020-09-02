@@ -1,0 +1,7 @@
+rule Method2TaskMethod	
+	transform j: UML!Class
+	to t : ProjectModel!Class{
+		//hadle methods
+		t.Name = "test";
+		"t".println();
+		}

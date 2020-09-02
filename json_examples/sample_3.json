@@ -1,0 +1,9 @@
+{"class": "go.GraphLinksModel", "nodeDataArray":
+    [   {"category": "Task", "text": "How to print binary tree diagram?", "fill": "#ffffff", "stroke": "#000000", "strokeWidth": 1, "key": -1, "refs": [], "ctsx": [], "comment": null, "tags": ["java", "printing", "binary-tree"], "score": 33.0},
+        {"category": "Task", "text": "Node", "fill": "#ffffff", "stroke": "#000000", "strokeWidth": 1, "key": -2, "refs": [], "ctsx": [], "comment": [], "tags": null, "score": null},
+        {"category": "Task", "text": "Node", "fill": "#ffffff", "stroke": "#000000", "strokeWidth": 1, "key": -3, "refs": [], "ctsx": [], "comment": "/** constructor */", "tags": null, "score": null},
+        {"category": "Task", "text": "toString", "fill": "#ffffff", "stroke": "#000000", "strokeWidth": 1, "key": -4, "refs": [], "ctsx": [], "comment": [], "tags": null, "score": null}],
+    "linkDataArray":
+[   {"category": "ConsistsOf", "text": "consists of", "routing": {"yb": "Normal", "oE": 1}, "from": -1, "to": -2, "refs": [], "ctsx": [], "comment": "null"},
+    {"category": "ConsistsOf", "text": "consists of", "routing": {"yb": "Normal", "oE": 1}, "from": -2, "to": -3, "refs": [], "ctsx": [], "comment": "null"}, {"category": "ConsistsOf", "text": "consists of", "routing": {"yb": "Normal", "oE": 1}, "from": -2, "to": -4, "refs": [], "ctsx": [], "comment": "null"}, {"category": "ConsistsOf", "text": "consists of", "routing": {"yb": "Normal", "oE": 1}, "from": -4, "to": -4, "refs": [], "ctsx": [], "comment": "null"}]}
+

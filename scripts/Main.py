@@ -42,7 +42,7 @@ def Main():
 
 
     # data_set.to_csv('df2.csv')
-    data_set = pd.read_csv(join(temp_dir, 'temp_datasets/df_score.csv'), encoding="ISO-8859-1", nrows=10)
+    data_set = pd.read_csv(join(temp_dir, 'temp_datasets/df_score.csv'), encoding="ISO-8859-1", nrows=500)
     codeextractor = stackoverflow_java_queries.codeExtractor(data_set)
 
 
@@ -53,17 +53,18 @@ def Main():
     # codeparser = stackoverflow_java_queries.codeParser(codes)
     codeparser = stackoverflow_java_queries.codeParser(body_mapping=body_mapping, answer_mapping=answer_mapping)
     mapped_code = codeparser.parse_code_new()
-    query_dict = extract_temp_mapped(mapped_code)
+    #query_dict = extract_temp_mapped(mapped_code)
     # {k: v for k, v in sorted(query_dict.items(), key=lambda item: item[1])}
-    # map_code = MapCreator.MapCreator(mapped_code)
-
-    # task_dict = map_code.create_dictionary(query='Simple Java calculator')
-    # with open("sample_1.json", 'w') as outfile:
-    #     json.dump(task_dict[0], outfile)
-    # with open("sample_2.json", 'w') as outfile:
-    #     json.dump(task_dict[1], outfile)
-    # with open("sample_3.json", 'w') as outfile:
-    #     json.dump(task_dict[2], outfile)
+    map_code = MapCreator.MapCreator(mapped_code)
+    task_dict = map_code.create_dictionary(query='How to print binary tree diagram?')
+    with open("sample_1.json", 'w') as outfile:
+        json.dump(task_dict[3], outfile)
+    with open("sample_2.json", 'w') as outfile:
+        json.dump(task_dict[5], outfile)
+    with open("sample_3.json", 'w') as outfile:
+        json.dump(task_dict[8], outfile)
+    with open("sample_4.json", 'w') as outfile:
+        json.dump(task_dict[11], outfile)
 
     # metadata = MetaDataCollector.MetaModel()
     # metadata.create_meta_model()

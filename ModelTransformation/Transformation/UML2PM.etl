@@ -1,0 +1,70 @@
+post{
+	//var TaskModel : new ProjectModel!Model;
+	for (t in transTrace.transformations) {
+		if( t.getRule().name == "Class2TaskClass"){
+			//var Task : new ProjectModel!TaskClass;
+			//var temp : new ProjectModel!Class;
+			//Task = t.targets[0];
+			//Task.println();
+			//TaskModel.packagedElements.add(Task);
+			//Model.link(Task);
+			"----".println();
+		}
+	}
+}
+rule Method2TaskMethod	
+	transform j: UML!Class
+	to t : ProjectModel!TaskMethod{
+		//hadle methods
+		guard : j.isMethod()
+		t.Name = j.name;
+		}
+
+	
+	
+rule Class2TaskClass
+	transform j: UML!Class
+	to t : ProjectModel!TaskClass{
+	//hadle classes
+	guard : not j.isMethod()
+	t.Name = j.name;
+	for(c in j.eContents()){
+		if(c.isTypeOf(UML!Class) and c.isMethod()){
+			var coLink = new ProjectModel!ConsistOfLink;
+			t.source.add(coLink);
+			c.equivalent().target.add(coLink);
+			}
+	}
+}
+
+rule Compose2ConsistOfLink	
+	transform j: UML!Property
+	to t : ProjectModel!ConsistOfLink{
+	
+		guard: j.isComp() and j.isMethodCall()
+
+		
+		j.association.memberEnds[1].type.equivalent().source.add(t);
+		j.association.memberEnds[0].type.equivalent().target.add(t);
+		
+	}
+	
+rule Compose2AcheivedByLink	
+	transform j: UML!Property
+	to t : ProjectModel!AchievedByLink{
+		guard: j.isComp() and not j.isMethodCall()
+		
+		j.association.memberEnds[1].type.equivalent().source.add(t);
+		j.association.memberEnds[0].type.equivalent().target.add(t);
+
+	}
+
+operation UML!Class isMethod() {
+	return self.appliedStereotypes.exists(s|s.name = "Method");
+}
+operation UML!Property isComp(){
+	return self.isComposite==true;
+}
+operation UML!Property isMethodCall(){
+	return self.association.memberEnds[0].type.isMethod() and self.association.memberEnds[1].type.isMethod();
+}

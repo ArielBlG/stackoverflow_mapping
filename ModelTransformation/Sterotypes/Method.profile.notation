@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<notation:Diagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmlns:style="http://www.eclipse.org/papyrus/infra/gmfdiag/style" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_aWkoEOq5EeqyYY7_QRiaaQ" type="PapyrusUMLProfileDiagram" name="Method" measurementUnit="Pixel">
+  <children xmi:type="notation:Shape" xmi:id="_e3MZsOtgEeqMtZJWtLvpAg" type="Stereotype_Shape">
+    <children xmi:type="notation:DecorationNode" xmi:id="_e3NAwOtgEeqMtZJWtLvpAg" type="Stereotype_NameLabel"/>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_e3NAwetgEeqMtZJWtLvpAg" type="Stereotype_AttributeCompartment">
+      <styles xmi:type="notation:TitleStyle" xmi:id="_e3NAwutgEeqMtZJWtLvpAg"/>
+      <styles xmi:type="notation:SortingStyle" xmi:id="_e3NAw-tgEeqMtZJWtLvpAg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_e3NAxOtgEeqMtZJWtLvpAg"/>
+      <layoutConstraint xmi:type="notation:Bounds" xmi:id="_e3NAxetgEeqMtZJWtLvpAg"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_e3NAxutgEeqMtZJWtLvpAg" type="Stereotype_OperationCompartment">
+      <styles xmi:type="notation:TitleStyle" xmi:id="_e3NAx-tgEeqMtZJWtLvpAg"/>
+      <styles xmi:type="notation:SortingStyle" xmi:id="_e3NAyOtgEeqMtZJWtLvpAg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_e3NAyetgEeqMtZJWtLvpAg"/>
+      <layoutConstraint xmi:type="notation:Bounds" xmi:id="_e3NAyutgEeqMtZJWtLvpAg"/>
+    </children>
+    <element xmi:type="uml:Stereotype" href="Method.profile.uml#_e3LyoOtgEeqMtZJWtLvpAg"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_e3MZsetgEeqMtZJWtLvpAg" x="320" y="180"/>
+  </children>
+  <styles xmi:type="notation:StringValueStyle" xmi:id="_aWkoEeq5EeqyYY7_QRiaaQ" name="diagram_compatibility_version" stringValue="1.4.0"/>
+  <styles xmi:type="notation:DiagramStyle" xmi:id="_aWkoEuq5EeqyYY7_QRiaaQ"/>
+  <styles xmi:type="style:PapyrusDiagramStyle" xmi:id="_aWkoE-q5EeqyYY7_QRiaaQ" diagramKindId="org.eclipse.papyrus.uml.diagram.profile">
+    <owner xmi:type="uml:Profile" href="Method.profile.uml#_WJ6aYOq5EeqyYY7_QRiaaQ"/>
+  </styles>
+  <element xmi:type="uml:Profile" href="Method.profile.uml#_WJ6aYOq5EeqyYY7_QRiaaQ"/>
+</notation:Diagram>

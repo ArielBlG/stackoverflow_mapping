@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:Method="http:///schemas/Method/_K1pFAOtiEeqMtZJWtLvpAg/0" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xsi:schemaLocation="http:///schemas/Method/_K1pFAOtiEeqMtZJWtLvpAg/0 Method.profile.uml#_K1pFAutiEeqMtZJWtLvpAg">
+  <uml:Model xmi:id="_i_A5AOhSEeqkxu2q0F4XUg" name="Model">
+    <packageImport xmi:type="uml:PackageImport" xmi:id="_jD-RgOhSEeqkxu2q0F4XUg">
+      <importedPackage xmi:type="uml:Model" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#_0"/>
+    </packageImport>
+    <packagedElement xmi:type="uml:Class" xmi:id="_4XSeIOhSEeqkxu2q0F4XUg" name="SuperClass" visibility="public">
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_J8RF4urGEeqyYY7_QRiaaQ" name="class" type="_935nAOhSEeqkxu2q0F4XUg" aggregation="composite" association="_J8P3wOrGEeqyYY7_QRiaaQ">
+        <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_J8Rs8OrGEeqyYY7_QRiaaQ"/>
+        <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_J8Rs8erGEeqyYY7_QRiaaQ" value="1"/>
+      </ownedAttribute>
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_xRcnYOhTEeqkxu2q0F4XUg" name="Func" concurrency="concurrent"/>
+      <nestedClassifier xmi:type="uml:PrimitiveType" xmi:id="_JoSZ8OhVEeqkxu2q0F4XUg" name="Name"/>
+      <nestedClassifier xmi:type="uml:Class" xmi:id="_RAA90Oq4EeqyYY7_QRiaaQ" name="Func"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Class" xmi:id="_935nAOhSEeqkxu2q0F4XUg" name="Class" visibility="public" redefinedClassifier="_4XSeIOhSEeqkxu2q0F4XUg">
+      <ownedOperation xmi:type="uml:Operation" xmi:id="_pt6lgOq5EeqyYY7_QRiaaQ" name="Func2"/>
+      <nestedClassifier xmi:type="uml:PrimitiveType" xmi:id="_TosZ0OhTEeqkxu2q0F4XUg" name="Name" visibility="public"/>
+      <nestedClassifier xmi:type="uml:Class" xmi:id="_lO0kAOq5EeqyYY7_QRiaaQ" name="Func2">
+        <ownedAttribute xmi:type="uml:Property" xmi:id="_u5Rx0uxTEeq9Qtf2LUS5uQ" name="func" type="_RAA90Oq4EeqyYY7_QRiaaQ" aggregation="composite" association="_u5RKwOxTEeq9Qtf2LUS5uQ">
+          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_u5SY4OxTEeq9Qtf2LUS5uQ"/>
+          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_u5SY4exTEeq9Qtf2LUS5uQ" value="1"/>
+        </ownedAttribute>
+      </nestedClassifier>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="_J8P3wOrGEeqyYY7_QRiaaQ" name="Inherit" visibility="public" memberEnd="_J8RF4urGEeqyYY7_QRiaaQ _J8Rs8urGEeqyYY7_QRiaaQ">
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_J8RF4OrGEeqyYY7_QRiaaQ" source="org.eclipse.papyrus">
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_J8RF4erGEeqyYY7_QRiaaQ" key="nature" value="UML_Nature"/>
+      </eAnnotations>
+      <ownedEnd xmi:type="uml:Property" xmi:id="_J8Rs8urGEeqyYY7_QRiaaQ" name="superclass" type="_4XSeIOhSEeqkxu2q0F4XUg" association="_J8P3wOrGEeqyYY7_QRiaaQ"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="_u5RKwOxTEeq9Qtf2LUS5uQ" memberEnd="_u5Rx0uxTEeq9Qtf2LUS5uQ _u5SY4uxTEeq9Qtf2LUS5uQ">
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_u5Rx0OxTEeq9Qtf2LUS5uQ" source="org.eclipse.papyrus">
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_u5Rx0exTEeq9Qtf2LUS5uQ" key="nature" value="UML_Nature"/>
+      </eAnnotations>
+      <ownedEnd xmi:type="uml:Property" xmi:id="_u5SY4uxTEeq9Qtf2LUS5uQ" name="func2" type="_lO0kAOq5EeqyYY7_QRiaaQ" association="_u5RKwOxTEeq9Qtf2LUS5uQ"/>
+    </packagedElement>
+    <profileApplication xmi:type="uml:ProfileApplication" xmi:id="_gzJp9uq5EeqyYY7_QRiaaQ">
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_gzNUUOq5EeqyYY7_QRiaaQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+        <references xmi:type="ecore:EPackage" href="Method.profile.uml#_gzJC4eq5EeqyYY7_QRiaaQ"/>
+      </eAnnotations>
+      <appliedProfile xmi:type="uml:Profile" href="Method.profile.uml#_gzBHEOq5EeqyYY7_QRiaaQ"/>
+    </profileApplication>
+    <profileApplication xmi:type="uml:ProfileApplication" xmi:id="_sM9L0OteEeqMtZJWtLvpAg">
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_sNEgkOteEeqMtZJWtLvpAg" source="http://www.eclipse.org/uml2/2.0.0/UML">
+        <references xmi:type="ecore:EPackage" href="Sterotypes/Method.profile.uml#_5Q7YcOteEeqMtZJWtLvpAg"/>
+      </eAnnotations>
+      <appliedProfile xmi:type="uml:Profile" href="Sterotypes/Method.profile.uml#_WJ6aYOq5EeqyYY7_QRiaaQ"/>
+    </profileApplication>
+    <profileApplication xmi:type="uml:ProfileApplication" xmi:id="_K1pFDutiEeqMtZJWtLvpAg">
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_K1q6MOtiEeqMtZJWtLvpAg" source="http://www.eclipse.org/uml2/2.0.0/UML">
+        <references xmi:type="ecore:EPackage" href="Method.profile.uml#_K1pFAutiEeqMtZJWtLvpAg"/>
+      </eAnnotations>
+      <appliedProfile xmi:type="uml:Profile" href="Method.profile.uml#_JrSKsOtiEeqMtZJWtLvpAg"/>
+    </profileApplication>
+  </uml:Model>
+  <uml:Model xmi:id="_zcwokOrpEeqMtZJWtLvpAg"/>
+  <uml:Model xmi:id="_0w2tsOrpEeqMtZJWtLvpAg"/>
+  <uml:Model xmi:id="_2-kicOrpEeqMtZJWtLvpAg"/>
+  <Method:Method xmi:id="_K1q6MetiEeqMtZJWtLvpAg" base_Class="_lO0kAOq5EeqyYY7_QRiaaQ"/>
+  <Method:Method xmi:id="_X2RCsOtiEeqMtZJWtLvpAg" base_Class="_RAA90Oq4EeqyYY7_QRiaaQ"/>
+</xmi:XMI>

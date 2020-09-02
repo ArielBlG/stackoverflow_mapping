@@ -1,5 +1,7 @@
 import json
 
+from CodeMapping import CodeWrapper
+
 
 def handle_quality(quality_dict, key):
     """
@@ -18,9 +20,12 @@ def handle_quality(quality_dict, key):
     quality_dict["comment"] = "null"
 
 
-def handle_task(mapped_dict, name, key, comments=None, post=None, code=None):
+def handle_task(mapped_dict, name, key, comments=None, post=None, code=None, tags=None, score=None):
     """
     handle_task Function - creates the pattern of a task
+    :param score:
+    :param tags:
+    :param code:
     :param mapped_dict:
     :param name:
     :param key:
@@ -36,8 +41,10 @@ def handle_task(mapped_dict, name, key, comments=None, post=None, code=None):
     mapped_dict["refs"] = []
     mapped_dict["ctsx"] = []
     mapped_dict["comment"] = comments
-    mapped_dict["post"] = post
-    mapped_dict["code"] = code
+    #mapped_dict["post"] = post
+    #mapped_dict["code"] = code
+    mapped_dict["tags"] = tags
+    mapped_dict["score"] = score
 
 
 def handle_arrows(mapped_arrows_dict, first_key, second_key, category, text):
@@ -106,8 +113,11 @@ class MapCreator:
                 key, full_task_dict = self.add_calling_methods(task, full_task_dict, key)
 
                 self.map_list.append(full_task_dict)
+                self.current_mapped_classes = []
+                self.current_mapped_methods = []
 
             return self.map_list
+
         for curr_query in self.mapped_code.keys():
             full_task_dict = {"class": "go.GraphLinksModel", "nodeDataArray": [], "linkDataArray": []}
             key = -1
@@ -151,7 +161,8 @@ class MapCreator:
         mapped_task_dict = {}
         code.set_key(key)
         query_key = key
-        handle_task(mapped_task_dict, code.query, key, comments=None, post=code.text, code=code.code)
+        handle_task(mapped_task_dict, code.query, key, comments=None, post=code.text, code=code.code, tags=code.tags,
+                    score=code.score)
         key = key - 1
         """append the task to the map"""
         full_task_dict["nodeDataArray"].append(mapped_task_dict)
@@ -265,7 +276,7 @@ class MapCreator:
 
     def get_method_task(self, method_name):
         for method in self.current_mapped_methods:
-            if method.method_name == method_name:
+            if method.get_method_name() == method_name:
                 return method
         return None
 
@@ -288,7 +299,7 @@ class MapCreator:
                     if linked_method is None:
                         continue
                     """checks if the called method is already mapped"""
-                    if calling_method.get_key() == 0:
+                    if linked_method.get_key() == 0:
                         handle_task(mapped_task_dict, method.method_name, key)
                         full_task_dict["nodeDataArray"].append(mapped_task_dict)
                         current_key = key

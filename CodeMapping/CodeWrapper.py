@@ -14,6 +14,7 @@ class Task:
         self.code = None
         self.code_changed = False
         self.imports = []
+        self.imports_codes = []
         self.tags = []
         self.score = None
 
@@ -30,6 +31,13 @@ class Task:
         :param score:
         """
         self.score = score
+
+    def add_imports_code(self, _import):
+        """
+        add_imports_code Function - adds code imports codes to the class
+        :param _import:
+        """
+        self.imports_codes.append(_import)
 
     def add_imports(self, _import):
         """
@@ -95,7 +103,7 @@ class CodeWrapper(Task):
         add_answer_text Function - adds the answer text to the query
         :param answer_text:
         """
-        self.answer_text = answer_text
+        self.text += answer_text
 
     def add_methods(self, method):
         """

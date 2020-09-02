@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="TaskModel" nsPrefix="TaskModel">
+  <eClassifiers xsi:type="ecore:EClass" name="TaskClass" eSuperTypes="#//Task"/>
+  <eClassifiers xsi:type="ecore:EClass" name="TaskMethod" eSuperTypes="#//Task"/>
+  <eClassifiers xsi:type="ecore:EClass" name="TaskBasedLink">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="target" eType="#//Task"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="source" eType="#//Task"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ConsistOfLink" eSuperTypes="#//TaskBasedLink"/>
+  <eClassifiers xsi:type="ecore:EClass" name="AchievedByLink" eSuperTypes="#//TaskBasedLink"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Task">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="Name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="target" upperBound="-1"
+        eType="#//TaskBasedLink"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="source" upperBound="-1"
+        eType="#//TaskBasedLink"/>
+  </eClassifiers>
+</ecore:EPackage>
