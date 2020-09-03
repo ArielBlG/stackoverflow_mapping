@@ -41,7 +41,7 @@ def handle_task(mapped_dict, name, key, comments=None, post=None, code=None, tag
     mapped_dict["refs"] = []
     mapped_dict["ctsx"] = []
     mapped_dict["comment"] = comments
-    #mapped_dict["post"] = post
+    mapped_dict["post"] = post
     #mapped_dict["code"] = code
     mapped_dict["tags"] = tags
     mapped_dict["score"] = score
@@ -79,73 +79,98 @@ class MapCreator:
         self.current_mapped_classes = []
         self.current_mapped_methods = []
 
-    def create_dictionary(self, query=None):
+    def create_dictionary(self, task):
         """
         create_dictionary Function - creates the map dictionary to turn into json.
         :return the map of all dictionaries
         """
-        if query is not None:
-            curr_query = query
+        # if query is not None:
+        #     curr_query = query
+        #
+        #     for task in self.mapped_code[curr_query]:
+        #         full_task_dict = {"class": "go.GraphLinksModel", "nodeDataArray": [], "linkDataArray": []}
+        #         key = -1
+        #         self.current_query = task
+        #         """ add the query task"""
+        #         key, full_task_dict, query_key = self.create_query_task(task, full_task_dict, key)
+        #
+        #         """ extract the class  """
+        #         key, full_task_dict = self.create_class_task(task, full_task_dict, key, query_key)
+        #
+        #         """ extract the implemented class  """
+        #         key, ull_task_dict = self.add_implemented_task(task, full_task_dict, key)
+        #
+        #         """extract the extended class """
+        #         key, full_task_dict = self.add_extended_task(task, full_task_dict, key)
+        #
+        #         """ extract the class's methods  """
+        #         key, full_task_dict = self.create_method_tasks(task, full_task_dict, key)
+        #
+        #         """extract the class's attributes"""
+        #         # key, full_task_dict = self.create_attribute_tasks(code, full_task_dict, key)
+        #
+        #         """extract the calling methods"""
+        #         key, full_task_dict = self.add_calling_methods(task, full_task_dict, key)
+        #
+        #         self.map_list.append(full_task_dict)
+        #         self.current_mapped_classes = []
+        #         self.current_mapped_methods = []
+        #
+        #     return self.map_list
 
-            for task in self.mapped_code[curr_query]:
-                full_task_dict = {"class": "go.GraphLinksModel", "nodeDataArray": [], "linkDataArray": []}
-                key = -1
-                self.current_query = task
-                """ add the query task"""
-                key, full_task_dict, query_key = self.create_query_task(task, full_task_dict, key)
+        # for curr_query in self.mapped_code.keys():
+        # for task in self.mapped_code:
+        full_task_dict = {"class": "go.GraphLinksModel", "nodeDataArray": [], "linkDataArray": []}
+        key = -1
+        """ add the query task"""
+        key, full_task_dict, query_key = self.create_query_task(task, full_task_dict, key)
 
-                """ extract the class  """
-                key, full_task_dict = self.create_class_task(task, full_task_dict, key, query_key)
+        """ extract the class  """
+        key, full_task_dict = self.create_class_task(task, full_task_dict, key, query_key)
 
-                """ extract the implemented class  """
-                key, ull_task_dict = self.add_implemented_task(task, full_task_dict, key)
+        """ extract the implemented class  """
+        key, ull_task_dict = self.add_implemented_task(task, full_task_dict, key)
 
-                """extract the extended class """
-                key, full_task_dict = self.add_extended_task(task, full_task_dict, key)
+        """extract the extended class """
+        key, full_task_dict = self.add_extended_task(task, full_task_dict, key)
 
-                """ extract the class's methods  """
-                key, full_task_dict = self.create_method_tasks(task, full_task_dict, key)
+        """ extract the class's methods  """
+        key, full_task_dict = self.create_method_tasks(task, full_task_dict, key)
 
-                """extract the class's attributes"""
-                # key, full_task_dict = self.create_attribute_tasks(code, full_task_dict, key)
+        """extract the class's attributes"""
+        # key, full_task_dict = self.create_attribute_tasks(code, full_task_dict, key)
 
-                """extract the calling methods"""
-                key, full_task_dict = self.add_calling_methods(task, full_task_dict, key)
+        """extract the calling methods"""
+        key, full_task_dict = self.add_calling_methods(task, full_task_dict, key)
 
-                self.map_list.append(full_task_dict)
-                self.current_mapped_classes = []
-                self.current_mapped_methods = []
+        return full_task_dict
+            # TODO: don't forget commented code
+            # self.map_list.append(full_task_dict)
+            # for task in self.mapped_code[curr_query]:
+            #     """ add the query task"""
+            #     key, full_task_dict, query_key = self.create_query_task(task, full_task_dict, key)
+            #
+            #     """ extract the class  """
+            #     key, full_task_dict = self.create_class_task(task, full_task_dict, key, query_key)
+            #
+            #     """ extract the implemented class  """
+            #     key, ull_task_dict = self.add_implemented_task(task, full_task_dict, key)
+            #
+            #     """extract the extended class """
+            #     key, full_task_dict = self.add_extended_task(task, full_task_dict, key)
+            #
+            #     """ extract the class's methods  """
+            #     key, full_task_dict = self.create_method_tasks(task, full_task_dict, key)
+            #
+            #     """extract the class's attributes"""
+            #     # key, full_task_dict = self.create_attribute_tasks(code, full_task_dict, key)
+            #
+            #     """extract the calling methods"""
+            #     key, full_task_dict = self.add_calling_methods(task, full_task_dict, key)
+            #
+            #     self.map_list.append(full_task_dict)
 
-            return self.map_list
-
-        for curr_query in self.mapped_code.keys():
-            full_task_dict = {"class": "go.GraphLinksModel", "nodeDataArray": [], "linkDataArray": []}
-            key = -1
-            for task in self.mapped_code[curr_query]:
-                """ add the query task"""
-                key, full_task_dict, query_key = self.create_query_task(task, full_task_dict, key)
-
-                """ extract the class  """
-                key, full_task_dict = self.create_class_task(task, full_task_dict, key, query_key)
-
-                """ extract the implemented class  """
-                key, ull_task_dict = self.add_implemented_task(task, full_task_dict, key)
-
-                """extract the extended class """
-                key, full_task_dict = self.add_extended_task(task, full_task_dict, key)
-
-                """ extract the class's methods  """
-                key, full_task_dict = self.create_method_tasks(task, full_task_dict, key)
-
-                """extract the class's attributes"""
-                # key, full_task_dict = self.create_attribute_tasks(code, full_task_dict, key)
-
-                """extract the calling methods"""
-                key, full_task_dict = self.add_calling_methods(task, full_task_dict, key)
-
-                self.map_list.append(full_task_dict)
-
-        return self.map_list
+        # return self.map_list
 
     def create_query_task(self, code, full_task_dict, key):
         """
