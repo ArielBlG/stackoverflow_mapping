@@ -1,5 +1,5 @@
 import stackoverflow_java_queries
-from googlesearch import search
+#from googlesearch import search
 
 
 class Task:
@@ -10,13 +10,21 @@ class Task:
         """
         self.task = None
         self.key = 0
-        self.documentation = []
+        self.documentation = ""
         self.code = None
         self.code_changed = False
         self.imports = []
         self.imports_codes = []
         self.tags = []
         self.score = None
+        self.post_id = None
+
+    def add_id(self, post_id):
+        """
+        add_id Function - adds the post id
+        :param post_id:
+        """
+        self.post_id = post_id
 
     def add_tags(self, tags):
         """
@@ -67,7 +75,9 @@ class Task:
         set_documentation - set the documentation of the task, inherit all tasks
         :param documentation:
         """
-        self.documentation = documentation
+        documentation = documentation.replace("/**", '')
+        documentation = documentation.replace("*/", '')
+        self.documentation += documentation
 
     def set_key(self, key):
         """
@@ -121,10 +131,9 @@ class CodeWrapper(Task):
         # TODO: handle two functions from same name
         return next((x for x in self.methods if x.get_method_name() == method_name), None)
 
-    def find_url(self):
+    def find_url(self, url):
         # TODO: to fix function
-        for url in search(self.query, tld='com', lang='en', num=1):
-            print(type(url))
+        self.url = url
 
     def add_class(self, task):
         """
@@ -183,6 +192,13 @@ class ClassTask(Task):
         self.Constructors = []
         self.sub_classes = []
         self.Enums = []
+
+    def add_sub_class(self, sub_class):
+        """
+        add_sub_class Function - adds a sub class
+        :param sub_class:
+        """
+        self.sub_classes.append(sub_class)
 
     def add_class_enums(self, enum):
         """

@@ -1,8 +1,3 @@
-import json
-
-from CodeMapping import CodeWrapper
-
-
 def handle_quality(quality_dict, key):
     """
     handle_quality Function - adds quality bar to the query
@@ -20,12 +15,13 @@ def handle_quality(quality_dict, key):
     quality_dict["comment"] = "null"
 
 
-def handle_task(mapped_dict, name, key, comments=None, post=None, code=None, tags=None, score=None):
+def handle_task(mapped_dict, name, key, comments=None, post=None, tags=None, score=None, url=None, task_type=None):
     """
     handle_task Function - creates the pattern of a task
+    :param task_type:
+    :param url:
     :param score:
     :param tags:
-    :param code:
     :param mapped_dict:
     :param name:
     :param key:
@@ -40,11 +36,16 @@ def handle_task(mapped_dict, name, key, comments=None, post=None, code=None, tag
     mapped_dict["key"] = key
     mapped_dict["refs"] = []
     mapped_dict["ctsx"] = []
+    mapped_dict["TaskType"] = task_type
     mapped_dict["comment"] = comments
-    mapped_dict["post"] = post
-    #mapped_dict["code"] = code
-    mapped_dict["tags"] = tags
-    mapped_dict["score"] = score
+    if post:
+        mapped_dict["post"] = post
+    if tags:
+        mapped_dict["tags"] = tags
+    if score:
+        mapped_dict["score"] = score
+    if url:
+        mapped_dict["url"] = url
 
 
 def handle_arrows(mapped_arrows_dict, first_key, second_key, category, text):
@@ -84,42 +85,6 @@ class MapCreator:
         create_dictionary Function - creates the map dictionary to turn into json.
         :return the map of all dictionaries
         """
-        # if query is not None:
-        #     curr_query = query
-        #
-        #     for task in self.mapped_code[curr_query]:
-        #         full_task_dict = {"class": "go.GraphLinksModel", "nodeDataArray": [], "linkDataArray": []}
-        #         key = -1
-        #         self.current_query = task
-        #         """ add the query task"""
-        #         key, full_task_dict, query_key = self.create_query_task(task, full_task_dict, key)
-        #
-        #         """ extract the class  """
-        #         key, full_task_dict = self.create_class_task(task, full_task_dict, key, query_key)
-        #
-        #         """ extract the implemented class  """
-        #         key, ull_task_dict = self.add_implemented_task(task, full_task_dict, key)
-        #
-        #         """extract the extended class """
-        #         key, full_task_dict = self.add_extended_task(task, full_task_dict, key)
-        #
-        #         """ extract the class's methods  """
-        #         key, full_task_dict = self.create_method_tasks(task, full_task_dict, key)
-        #
-        #         """extract the class's attributes"""
-        #         # key, full_task_dict = self.create_attribute_tasks(code, full_task_dict, key)
-        #
-        #         """extract the calling methods"""
-        #         key, full_task_dict = self.add_calling_methods(task, full_task_dict, key)
-        #
-        #         self.map_list.append(full_task_dict)
-        #         self.current_mapped_classes = []
-        #         self.current_mapped_methods = []
-        #
-        #     return self.map_list
-
-        # for curr_query in self.mapped_code.keys():
-        # for task in self.mapped_code:
         full_task_dict = {"class": "go.GraphLinksModel", "nodeDataArray": [], "linkDataArray": []}
         key = -1
         """ add the query task"""
@@ -143,34 +108,40 @@ class MapCreator:
         """extract the calling methods"""
         key, full_task_dict = self.add_calling_methods(task, full_task_dict, key)
 
+        """extract the sub classes"""
+        key, full_task_dict = self.add_sub_clases_task(task, full_task_dict, key)
         return full_task_dict
-            # TODO: don't forget commented code
-            # self.map_list.append(full_task_dict)
-            # for task in self.mapped_code[curr_query]:
-            #     """ add the query task"""
-            #     key, full_task_dict, query_key = self.create_query_task(task, full_task_dict, key)
-            #
-            #     """ extract the class  """
-            #     key, full_task_dict = self.create_class_task(task, full_task_dict, key, query_key)
-            #
-            #     """ extract the implemented class  """
-            #     key, ull_task_dict = self.add_implemented_task(task, full_task_dict, key)
-            #
-            #     """extract the extended class """
-            #     key, full_task_dict = self.add_extended_task(task, full_task_dict, key)
-            #
-            #     """ extract the class's methods  """
-            #     key, full_task_dict = self.create_method_tasks(task, full_task_dict, key)
-            #
-            #     """extract the class's attributes"""
-            #     # key, full_task_dict = self.create_attribute_tasks(code, full_task_dict, key)
-            #
-            #     """extract the calling methods"""
-            #     key, full_task_dict = self.add_calling_methods(task, full_task_dict, key)
-            #
-            #     self.map_list.append(full_task_dict)
 
-        # return self.map_list
+
+    def add_sub_clases_task(self, code, full_task_dict, key):
+        """
+        add_sub_classes_task Function - connectes the sub classes
+        :param code:
+        :param full_task_dict:
+        :param key:
+        :return:
+        """
+        for main_class in code.sub_classes:
+            for sub_class in main_class.sub_classes:
+                mapped_arrows_dict = {}
+                mapped_task_dict = {}
+                "avoid system calls"
+                linked_class = self.get_sub_class_task(sub_class.get_class_name())
+                if linked_class is None:
+                    continue
+                """checks if the called method is already mapped"""
+                if linked_class.get_key() == 0:
+                    handle_task(mapped_task_dict, sub_class.get_class_name(), key, task_type="Class")
+                    full_task_dict["nodeDataArray"].append(mapped_task_dict)
+                    current_key = key
+                    key = key - 1
+                else:
+                    current_key = linked_class.get_key()
+                """connect the arrows from a specific method to its called methods"""
+                handle_arrows(mapped_arrows_dict, main_class.get_key(), current_key, "ConsistsOf",
+                              "consists of")
+                full_task_dict["linkDataArray"].append(mapped_arrows_dict)
+        return key, full_task_dict
 
     def create_query_task(self, code, full_task_dict, key):
         """
@@ -186,8 +157,8 @@ class MapCreator:
         mapped_task_dict = {}
         code.set_key(key)
         query_key = key
-        handle_task(mapped_task_dict, code.query, key, comments=None, post=code.text, code=code.code, tags=code.tags,
-                    score=code.score)
+        handle_task(mapped_task_dict, code.query, key, comments=None, tags=code.tags,
+                    score=code.score, url=code.url, task_type="query")
         key = key - 1
         """append the task to the map"""
         full_task_dict["nodeDataArray"].append(mapped_task_dict)
@@ -209,7 +180,8 @@ class MapCreator:
             mapped_arrows_dict = {}
             sub_class.set_key(key)
             handle_task(mapped_task_dict, sub_class.class_name, key, comments=sub_class.documentation,
-                        code=sub_class.code)
+                        task_type="Class")
+
             key = key - 1
             """append the class to the map"""
             full_task_dict["nodeDataArray"].append(mapped_task_dict)
@@ -249,8 +221,8 @@ class MapCreator:
         for sub_class in code.sub_classes:
             if sub_class.Extends is not None:
                 mapped_arrows_dict = {}
-                handle_arrows(mapped_arrows_dict, sub_class.get_key(), sub_class.Extends.get_key(), "ExtendedBy",
-                              "extended by")
+                handle_arrows(mapped_arrows_dict, sub_class.get_key(), sub_class.Extends.get_key(), "AchievedBy",
+                              "achieved by")
                 full_task_dict["linkDataArray"].append(mapped_arrows_dict)
                 key = key - 1
                 self.current_mapped_classes.append(sub_class.Extends)
@@ -269,7 +241,9 @@ class MapCreator:
             for method in sub_class.Methods:
                 mapped_arrows_dict = {}
                 mapped_task_dict = {}
-                handle_task(mapped_task_dict, method.method_name, key, comments=method.documentation, code=method.code)
+                handle_task(mapped_task_dict, method.method_name, key, comments=method.documentation,
+                            task_type="Method")
+
                 method.set_key(key)
                 """adds the method to the map"""
                 full_task_dict["nodeDataArray"].append(mapped_task_dict)
@@ -287,11 +261,12 @@ class MapCreator:
         :param full_task_dict:
         :return:
         """
+
         for sub_class in code.sub_classes:
             for attribute in sub_class.Attributes:
                 mapped_arrows_dict = {}
                 mapped_task_dict = {}
-                handle_task(mapped_task_dict, attribute.name, key)
+                handle_task(mapped_task_dict, attribute.name, key, task_type="Attribute")
                 attribute.set_key(key)
                 full_task_dict["nodeDataArray"].append(mapped_task_dict)
                 handle_arrows(mapped_arrows_dict, sub_class.get_key(), key, "AchievedBy", "achieved by")
@@ -303,6 +278,12 @@ class MapCreator:
         for method in self.current_mapped_methods:
             if method.get_method_name() == method_name:
                 return method
+        return None
+
+    def get_sub_class_task(self, class_name):
+        for sub_class in self.current_mapped_classes:
+            if sub_class.get_class_name() == class_name:
+                return sub_class
         return None
 
     def add_calling_methods(self, code, full_task_dict, key):
@@ -325,7 +306,7 @@ class MapCreator:
                         continue
                     """checks if the called method is already mapped"""
                     if linked_method.get_key() == 0:
-                        handle_task(mapped_task_dict, method.method_name, key)
+                        handle_task(mapped_task_dict, method.method_name, key, task_type="Method")
                         full_task_dict["nodeDataArray"].append(mapped_task_dict)
                         current_key = key
                         key = key - 1

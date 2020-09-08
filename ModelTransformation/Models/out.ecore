@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:TaskModel="TaskModel" xsi:schemaLocation="TaskModel ClassTask.ecore">
-  <TaskModel:TaskMethod Name="Func" target="#/6 #/4"/>
-  <TaskModel:TaskMethod Name="Func2" target="#/7" source="#/4"/>
-  <TaskModel:TaskClass Name="SuperClass" source="#/6 #/5"/>
-  <TaskModel:TaskClass Name="Class" target="#/5" source="#/7"/>
+  <TaskModel:TaskMethod Name="Func" target="#/7 #/4"/>
+  <TaskModel:TaskMethod Name="Func2" target="#/8" source="#/4"/>
+  <TaskModel:TaskClass Name="SuperClass" target="#/6" source="#/7 #/5"/>
+  <TaskModel:TaskClass Name="Class" target="#/5" source="#/8 #/6"/>
   <TaskModel:ConsistOfLink/>
   <TaskModel:AchievedByLink/>
+  <TaskModel:ConsistOfLink/>
   <TaskModel:ConsistOfLink/>
   <TaskModel:ConsistOfLink/>
 </xmi:XMI>

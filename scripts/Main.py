@@ -21,37 +21,48 @@ def extract_temp_mapped(mapped_code):
 
 
 def Main():
-    # the query we send to bigquery datasset, joining question and answer by id
+    # the query we send to bigquery dataset, joining question and answer by id
     # filter the limit to 10000 - need better computer for more
     # TODO: , pq.tags
     questions_query = """
-                        SELECT pq.title,pq.body, com.body as answers_body, com.score as score, pq.tags as tags
+                        SELECT pq.title,pq.body, com.body as answers_body, pq.id as post_id, com.score as score, pq.tags as tags
     FROM `bigquery-public-data.stackoverflow.posts_questions` as pq
     inner join `bigquery-public-data.stackoverflow.posts_answers` as com on pq.id = com.parent_id
-    WHERE pq.tags LIKE '%java%' AND pq.tags NOT LIKE '%javascript%' AND pq.body LIKE '%<code>%' AND pq.body LIKE '%class%' 
-         AND com.body LIKE '%<code>%'
-    LIMIT 5000
+    WHERE pq.tags LIKE '%java%' AND pq.tags NOT LIKE '%javascript%' AND pq.body LIKE '%<code>%'
+     AND pq.body LIKE '%class%' AND com.body LIKE '%<code>%'
+    LIMIT 15
                       """
-
-    """creates the datacollector"""
+    how_to_query = """SELECT pq.title,pq.body, com.body as answers_body, pq.id as post_id, com.score as score, pq.tags as tags
+        FROM `bigquery-public-data.stackoverflow.posts_questions` as pq
+        inner join `bigquery-public-data.stackoverflow.posts_answers` as com on pq.id = com.parent_id
+        WHERE pq.tags LIKE '%java%' AND pq.tags NOT LIKE '%javascript%' AND pq.body LIKE '%<code>%'
+        AND pq.body LIKE '%class%' AND com.body LIKE '%<code>%' AND pq.title LIKE '%How to%'
+        AND (pq.title LIKE '%ist%' OR pq.title LIKE '%ree%' OR pq.title LIKE '%raph%' OR pq.title LIKE '%rray%' OR pq.title LIKE '%sort%' 
+        or pq.title LIKE '%queue%' or pq.title LIKE '%stack%' or pq.title LIKE '%DFS%' or pq.title LIKE '%BFS%')
+        AND pq.id in (SELECT com1.parent_id
+        FROM `bigquery-public-data.stackoverflow.posts_questions` as pq1
+        inner join `bigquery-public-data.stackoverflow.posts_answers` as com1 on pq1.id = com1.parent_id
+        GROUP BY com1.parent_id
+        HAVING COUNT(com1.parent_id) > 3);"""
+    """creates the collector"""
     #
-    # datacollector = stackoverflow_java_queries.dataCollector(CRED_FILENAME)
-    # datacollector.openclient()
-    # data_set = datacollector.getdataset(questions_query)  # get the data set created from the bigquery dataset
-    # data_set.to_csv('df_score.csv')
+    data_collector = stackoverflow_java_queries.dataCollector(CRED_FILENAME)
+    data_collector.open_client()
+    data_set = data_collector.get_dataset(how_to_query)  # get the data set created from the bigquery dataset
+    # data_set.to_csv('df_score_id.csv')
 
     # data_set.to_csv('df2.csv')
-    data_set = pd.read_csv(join(temp_dir, 'temp_datasets/df_score.csv'), encoding="ISO-8859-1", nrows=100)
-    codeextractor = stackoverflow_java_queries.codeExtractor(data_set)
-
-    body_mapping, answer_mapping = codeextractor.extractCodes()
+    # data_set = pd.read_csv(join(temp_dir, 'temp_datasets/df_score_id.csv'), encoding="ISO-8859-1", nrows=5000)
+    code_extractor = stackoverflow_java_queries.codeExtractor(data_set)
+    #
+    body_mapping, answer_mapping = code_extractor.extractCodes()
     init = ParserToMap.ParserToMap(MapCreator, CodeWrapper, body_mapping, answer_mapping)
     init.initiate()
 
     """the whole data set"""
-    # codeparser = stackoverflow_java_queries.codeParser(codes)
-    # codeparser = stackoverflow_java_queries.codeParser(body_mapping=body_mapping, answer_mapping=answer_mapping)
-    # mapped_code = codeparser.parse_code_new()
+    # code_parser = stackoverflow_java_queries.codeParser(codes)
+    # code_parser = stackoverflow_java_queries.codeParser(body_mapping=body_mapping, answer_mapping=answer_mapping)
+    # mapped_code = code_parser.parse_code_new()
     # query_dict = extract_temp_mapped(mapped_code)
     # {k: v for k, v in sorted(query_dict.items(), key=lambda item: item[1])}
     # map_code = MapCreator.MapCreator(mapped_code)

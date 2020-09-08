@@ -22,6 +22,7 @@
           <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_zKSZUeq5EeqyYY7_QRiaaQ" value="1"/>
         </ownedAttribute>
       </nestedClassifier>
+      <nestedClassifier xmi:type="uml:Class" xmi:id="_pSk2oO3VEeqdNcosNLpqIw" name="TestClass"/>
     </packagedElement>
     <packagedElement xmi:type="uml:Association" xmi:id="_zKOu8Oq5EeqyYY7_QRiaaQ" visibility="package" memberEnd="_zKRyQOq5EeqyYY7_QRiaaQ _zKTAYOq5EeqyYY7_QRiaaQ">
       <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_zKQkIOq5EeqyYY7_QRiaaQ" source="org.eclipse.papyrus">

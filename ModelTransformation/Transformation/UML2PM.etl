@@ -28,7 +28,11 @@ rule Class2TaskClass
 	//hadle classes
 	guard : not j.isMethod()
 	t.Name = j.name;
+	for(l in j.eContainer()){
+		//l.println();
+	}
 	for(c in j.eContents()){
+		//c.println();
 		if(c.isTypeOf(UML!Class) and c.isMethod()){
 			var coLink = new ProjectModel!ConsistOfLink;
 			t.source.add(coLink);
@@ -58,7 +62,18 @@ rule Compose2AcheivedByLink
 		j.association.memberEnds[0].type.equivalent().target.add(t);
 
 	}
-
+rule ClassInstance2ConsistOfLink
+	transform j: UML!Property
+	to t: ProjectModel!ConsistOfLink{
+	
+		guard: j.isOrderedCall()
+		
+		j.eContainer.equivalent().source.add(t);
+		j.type.equivalent().target.add(t);
+	}
+operation UML!Property isOrderedCall(){
+	return self.isOrdered==true;
+}
 operation UML!Class isMethod() {
 	return self.appliedStereotypes.exists(s|s.name = "Method");
 }
@@ -67,4 +82,7 @@ operation UML!Property isComp(){
 }
 operation UML!Property isMethodCall(){
 	return self.association.memberEnds[0].type.isMethod() and self.association.memberEnds[1].type.isMethod();
+}
+operation UML!Property isOrderedCall(){
+	return self.isOrdered==true;
 }

@@ -1,3 +1,4 @@
+import os
 from os.path import dirname, join
 from os import environ
 import re
@@ -8,7 +9,8 @@ from CodeMapping import CodeWrapper
 from collections import namedtuple
 from itertools import takewhile
 from enum import Enum
-import javac_parser
+from javalang import tree
+# import javac_parser
 import copy
 
 
@@ -21,24 +23,24 @@ Position = namedtuple('Position', ['line', 'column'])
 PATH = dirname(__file__)
 temp_dir = dirname(dirname(__file__))
 
-Body_Dict = namedtuple('Body_Dict', ['text', 'code', 'tags'])
+Body_Dict = namedtuple('Body_Dict', ['text', 'code', 'tags', 'post_id'])
 Post_Dict = namedtuple('post_dict', ['text', 'code', 'score'])
 
 primitive_types = ['Boolean', 'boolean', 'char', 'byte', 'short', 'int', 'long', 'float', 'double', 'String', 'string',
                    'System', 'System.out', 'Scanner', 'Log']
 
 
-class codeExtractor():
+class codeExtractor:
 
     def __init__(self, dataset=None, path=None):
         """
-        Code Extractor Constructor - Recieves a dataset or path to a csv file and keeps the data as in Attribute.
+        Code Extractor Constructor - Receives a dataset or path to a csv file and keeps the data as in Attribute.
         """
         if path is None:
             # self.data = dataset
 
             """splits the data frame into body and answers"""
-            self.body_df = dataset[["title", "body", "tags"]]
+            self.body_df = dataset[["title", "body", "tags", "post_id"]]
             self.answer_df = dataset[["title", "answers_body", "score"]]
             self.body_df = self.body_df.drop_duplicates(subset=['title'])
             self.body_mapping = {}
@@ -49,7 +51,7 @@ class codeExtractor():
     def extractCodes(self):
         """
         extractCodes Function - cleans the dataset by removing unnecessary tags like <p> and keeps <code> tags.
-        Return - dictionary -> title : codeslist
+        Return - dictionary -> title : codes
         """
         # body_mapping = {}
         # answer_mapping = {}
@@ -57,16 +59,15 @@ class codeExtractor():
         # code_dict = pd.DataFrame(columns=['title', 'text', 'code'])
 
         """handle the posts"""
+        tags = ""
         for index, df_row in self.body_df.iterrows():
-            try:
-                text, code = self.extract_code_text_to_dict(df_row['body'])
-            except:
-                continue
+            text, code = self.extract_code_text_to_dict(df_row['body'])
 
             if pd.notna(df_row['tags']):
                 tags = df_row['tags'].split('|')  # extract the tags
+            post_id = df_row["post_id"]
 
-            body_dict = Body_Dict(text, code, tags)  # adds everything to the new dict
+            body_dict = Body_Dict(text, code, tags, post_id )  # adds everything to the new dict
             self.body_mapping[df_row['title']] = body_dict
             self.answer_mapping[df_row['title']] = []  # prepare the title to the answer
 
@@ -74,7 +75,7 @@ class codeExtractor():
         for index, df_row in self.answer_df.iterrows():
             try:
                 text, code = self.extract_code_text_to_dict(df_row['answers_body'])
-            except:
+            except TypeError:
                 continue
             body_dict = Post_Dict(text, code, df_row['score'])  # adds the comment score
             self.answer_mapping[df_row['title']].append(body_dict)
@@ -89,7 +90,6 @@ class codeExtractor():
         """
         text = ""
         code = []
-
         for curr_text in re.findall(r"<p>(.*?)</p>", post, flags=re.DOTALL):  # extract the text
             text += curr_text
 
@@ -105,10 +105,11 @@ class codeExtractor():
             curr_code = curr_code.replace('...', '/** ...*/')
             code.append(curr_code)
 
-        # for code_comments in code:
-        #     search_comments = re.findall("//(.*?)\n", code_comments, flags=re.DOTALL)
-        #     for comment in search_comments:
-        #         code = code.replace("//" + comment, '\**' + comment + "*/")
+        for index in range(len(code)):
+            search_comments = re.findall("//(.*?)\n", code[index], flags=re.DOTALL)
+            for comment in search_comments:
+                if "/**" not in comment:
+                    code[index] = code[index].replace("//" + comment, '/**' + comment + "*/")
 
         return text, code
 
@@ -189,13 +190,13 @@ def create_collected_code(query):
         indent = len(whitespace) + 4
         for class_enum in modified_class.Enums:
             new_class_code += (' ' * indent) + class_enum.code
-        for class_atts in modified_class.Attributes:
-            if class_atts.code not in new_class_code:
-                new_class_code += (' ' * indent) + class_atts.code
+        for class_attributes in modified_class.Attributes:
+            if class_attributes.code not in new_class_code:
+                new_class_code += (' ' * indent) + class_attributes.code
         for class_method in modified_class.Methods:
             if class_method.code is not None:
-                new_indenet = '\n ' + ' ' * indent
-                method_code = class_method.code.replace('\n', new_indenet)
+                new_indent = '\n ' + ' ' * indent
+                method_code = class_method.code.replace('\n', new_indent)
                 new_class_code += (' ' * indent) + method_code + '\n '
         new_class_code += (' ' * (indent - 4)) + '}' + '\n'
 
@@ -244,14 +245,14 @@ def extract_att_code(position, parser_token_list, current_query, modifiers=None)
     return code
 
 
-class codeParser():
+class codeParser:
 
     def __init__(self, code_dict=None, body_mapping=None, answer_mapping=None):
         """
         Code Parser Constructor - receives dataset of codes, and parse the code to fields.
         """
         self.all_codes = code_dict
-        self.counter_succeded_queries = 0
+        # self.counter_succeeded_queries = 0
         self.mapped_code = {}
         self.system_methods = []
         self.parsing_error = None
@@ -343,11 +344,11 @@ class codeParser():
 
     def code_parser_class(self, code, current_query):
         """
-        code_parser_class Function - trys to parse a class
+        code_parser_class Function - is trying to parse a class
         :param code:
         :param current_query:
         """
-        try:  # trys to parse the code
+        try:  # is trying to parse the code
             tree = javalang.parse.parse(code)
             parser_token_list = javalang.parser.Parser(javalang.tokenizer.tokenize(code)).tokens.list  # token array
             self.parsing_error = None
@@ -367,7 +368,7 @@ class codeParser():
 
     def extractor_class(self, class_extract, current_query, parser_token_list):
         """
-        extractor_class Function - extracts everythong from the class
+        extractor_class Function - extracts everything from the class
         :param class_extract:
         :param current_query:
         :param parser_token_list:
@@ -454,14 +455,17 @@ class codeParser():
                 for enum_body in body.body.constants:
                     if isinstance(enum_body, javalang.tree.EnumConstantDeclaration):
                         enum_task.add_enum_const(enum_body.name)
-                enum_task.code = extract_specific_code(body.position, parser_token_list, body, current_query,
-                                                       body.modifiers)
+                # enum_task.code = extract_specific_code(body.position, parser_token_list, body, current_query,
+                #                                        body.modifiers)
         """handle sub classes declarations"""
         # TODO: CHECK IF NEEDED TO MAP SAME
         if class_extract is not None:
             for children in class_extract.body:
                 if isinstance(children, javalang.tree.ClassDeclaration):
                     self.extractor_class(children, current_query, parser_token_list)
+                    new_sub_class = current_query.get_class(children.name)
+                    if new_sub_class is not None:
+                        current_class.add_sub_class(new_sub_class)
 
         """handle method function calls"""
         # TODO: problem in method calls
@@ -470,7 +474,8 @@ class codeParser():
                 current_method = current_class.get_class_method(method.name)
                 self.extract_method_invocation_new(method, current_query, current_method, parser_token_list)
         else:
-            self.extract_method_invocation_new(method, current_query, current_method, parser_token_list)
+            # self.extract_method_invocation_new(method, current_query, current_method, parser_token_list)
+            raise Exception("should not happen")
 
     def extract_method_invocation_new(self, method, current_query, current_method, parser_token_list):
         """
@@ -484,17 +489,7 @@ class codeParser():
         if method.body is None:
             return
         for method_body in method.body:
-            """handle declarations"""
-            if isinstance(method_body, javalang.tree.Declaration):
-                self.handle_method_declarations(method_body, method, current_query, current_method, parser_token_list)
-
-            """handle statments"""
-            if isinstance(method_body, javalang.tree.Statement):
-                self.handle_method_statements(method_body, method, current_query, current_method, parser_token_list)
-
-            """handle expression"""
-            if isinstance(method_body, javalang.tree.Expression):
-                self.handle_method_expressions(method_body, method, current_query, current_method, parser_token_list)
+            self.handle_unknown_node(method_body, method, current_query, current_method, parser_token_list)
 
     def handle_unknown_node(self, node, method, current_query, current_method, parser_token_list):
         """
@@ -510,7 +505,7 @@ class codeParser():
         if isinstance(node, javalang.tree.Declaration):
             self.handle_method_declarations(node, method, current_query, current_method, parser_token_list)
 
-        """handle statments"""
+        """handle statements"""
         if isinstance(node, javalang.tree.Statement):
             self.handle_method_statements(node, method, current_query, current_method, parser_token_list)
 
@@ -559,7 +554,6 @@ class codeParser():
                                                parser_token_list)
             else:
                 raise Exception("to fix")
-
 
         # MemberReference
         elif isinstance(expression, javalang.tree.MemberReference):
@@ -611,11 +605,14 @@ class codeParser():
                     self.handle_unknown_node(body, method, current_query, current_method, parser_token_list)
             else:
                 self.handle_unknown_node(expression.body, method, current_query, current_method, parser_token_list)
-        # ReferenceType
-        elif isinstance(expression, javalang.tree.ReferenceType):
+        # ReferenceType , BasicType
+        elif isinstance(expression, javalang.tree.ReferenceType) or isinstance(expression, javalang.tree.BasicType):
             self.handle_method_expressions(None, method, current_query, current_method, parser_token_list)
         # InnerClassCreator
         elif isinstance(expression, javalang.tree.InnerClassCreator):
+            self.handle_method_expressions(None, method, current_query, current_method, parser_token_list)
+        # SuperMemberReference  # TODO: imo not relevant
+        elif isinstance(expression, javalang.tree.SuperMemberReference):
             self.handle_method_expressions(None, method, current_query, current_method, parser_token_list)
         else:
             print("wa")
@@ -625,14 +622,14 @@ class codeParser():
     def handle_class_creator_calls(self, class_name, method, current_query, current_method, parser_token_list):
         """
         handle_class_creator_calls Function - handles "new" calls
-        :param expression:
+        :param class_name:
         :param method:
         :param current_query:
         :param current_method:
         :param parser_token_list:
         :return:
         """
-        if class_name  in primitive_types and class_name  in self.system_methods:
+        if class_name in primitive_types and class_name in self.system_methods:
             return
         current_class = current_query.get_class(class_name)
         if current_class is not None:
@@ -678,7 +675,7 @@ class codeParser():
         for exp_children in expression.children:
             if isinstance(exp_children, javalang.tree.Expression):
                 self.handle_method_expressions(exp_children, method, current_query, current_method, parser_token_list)
-            # TODO : check relevent else
+            # TODO : check relevant else
 
     def handle_method_invokes(self, expression, method, current_query, current_method):
         """
@@ -713,7 +710,7 @@ class codeParser():
 
     def handle_const_calls(self, expression, method, current_query, current_method):
         """
-        handle_const_calls Function - handle excplicit cons calls
+        handle_const_calls Function - handle explicit cons calls
         :param expression:
         :param method:
         :param current_query:
@@ -789,7 +786,7 @@ class codeParser():
                 #     if called_method is not None:
                 #         current_method.add_method_calls(called_method)
                 #         return  # TODO: change to normal if
-            # TODO: be carefull!
+            # TODO: be careful!
             called_method = CodeWrapper.MethodTask(expression.member, call_qualifier)
             if called_method not in current_method.calling_methods:
                 current_method.add_method_calls(called_method)
@@ -803,7 +800,7 @@ class codeParser():
                     if called_method not in current_method.calling_methods:
                         current_method.add_method_calls(called_method)
                 else:
-                    # TODO: be carefull!
+                    # TODO: be careful!
                     called_method = CodeWrapper.MethodTask(expression.member, current_method.get_method_super_class())
                     if called_method not in current_method.calling_methods:
                         current_method.add_method_calls(called_method)
@@ -839,7 +836,7 @@ class codeParser():
                     if super_method not in current_method.calling_methods:
                         current_method.add_method_calls(super_method)
                 else:
-                    # TODO: unkown implement
+                    # TODO: unknown implement
                     # raise Exception("unknown implement")
                     return
         else:
@@ -948,7 +945,7 @@ class codeParser():
 
     def handle_method_declarations(self, declarations, method, current_query, current_method, parser_token_list):
         """
-        handle_method_declarations Funciton - handles method's body declarations
+        handle_method_declarations Function - handles method's body declarations
         :param declarations:
         :param method:
         :param current_query:
@@ -1027,6 +1024,8 @@ class codeParser():
             parser_token_list = parser.tokens.list
             self.parsing_error = None
         except (javalang.parser.JavaParserBaseException, javalang.tokenizer.LexerError, TypeError, StopIteration) as e:
+            #print(e)
+            #print(current_query.query)
             # self.parsing_error = Errors.FAILED_PARSING
             return
         """ handles wrong class declaration """
@@ -1082,9 +1081,21 @@ class codeParser():
 
             """extract method calls"""
             self.extract_method_invocation_new(method, current_query, current_method, parser_token_list)
+
+            """handle enum declarations"""
+        elif isinstance(method, javalang.tree.EnumDeclaration):  # TODO: fix enum declaration
+            current_class = CodeWrapper.ClassTask("unknown")
+            enum_task = CodeWrapper.EnumTask(method.name, current_class)
+            current_class.add_class_enums(enum_task)
+            for enum_body in method.body.constants:
+                if isinstance(enum_body, javalang.tree.EnumConstantDeclaration):
+                    enum_task.add_enum_const(enum_body.name)
         else:
             print('of')
-            raise Exception("undifined")
+            raise Exception("undefined")
+
+
+
 
     def extractor_method_class(self, current_method, current_query, method, parser_token_list, first_map=True):
         """
@@ -1163,10 +1174,10 @@ class codeParser():
             else:
                 if field.type.name not in type_name:
                     type_name.append(field.type.name)
-            # TODO: attribute modifiers and documenetation
+            # TODO: attribute modifiers and documentation
 
             """handle attribute code"""
-            attribute_code = extract_att_code(field.position, parser_token_list, current_query, field.modifiers)
+            # attribute_code = extract_att_code(field.position, parser_token_list, current_query, field.modifiers)
             ds_class = current_query.get_class(data_structure)
             if data_structure is not None and ds_class is None:
                 ds_class = CodeWrapper.ClassTask(data_structure)
@@ -1196,7 +1207,7 @@ class codeParser():
             if not isinstance(field, javalang.tree.LocalVariableDeclaration):
                 if field.documentation is not None:
                     for doc in field.documentation:
-                        attribute.documentation.append(doc)
+                        attribute.set_documentation(doc)
                         # attribute_code += doc + '\n ' + attribute_code
             # attribute.code = attribute_code
 
@@ -1255,7 +1266,7 @@ class codeParser():
 
     def add_extended_class(self, current_query, extended_class, current_class):
         """
-        add_extended_class Funciton - adds the extended class of the current class
+        add_extended_class Function - adds the extended class of the current class
         :param current_query:
         :param extended_class:
         :param current_class:
@@ -1323,7 +1334,7 @@ class codeParser():
             constructor_name = constructor.name
             new_constructor = CodeWrapper.MethodTask(constructor_name, current_class)
             if constructor.documentation is not None:
-                new_constructor.documentation = constructor.documentation
+                new_constructor.set_documentation(constructor.documentation)
         # new_constructor.set_code(extract_specific_code(constructor.position, parser_token_list, constructor,
         #                                                current_query, modifiers=constructor.modifiers))
         if len(current_class.Constructors) < number_of_constructors:
@@ -1333,24 +1344,28 @@ class codeParser():
 
 # ------------------------------------------------------------------------------
 
-class dataCollector():
+class dataCollector:
 
     def __init__(self, path):
         """
         Data Collector Constructor - adds google credentials.
         """
-        environ["GOOGLE_APPLICATION_CREDENTIALS"] = path
+        cred_dir = dirname(dirname(__file__))
+        # environ["GOOGLE_APPLICATION_CREDENTIALS"] = path
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = join(cred_dir, 'CodeMapping/stackoverflowmap-03d45ecd6795.json')
+        self.client = None
+        self.dataset_ref = None
 
-    def openclient(self):
+    def open_client(self):
         """
-        openclient Function - connects to google big query dataset
+        open_client Function - connects to google big query dataset
         """
         self.client = bigquery.Client()
         self.dataset_ref = self.client.dataset("stackoverflow", project="bigquery-public-data")
 
-    def getdataset(self, query):
+    def get_dataset(self, query):
         """
-        getdataset Function - Enters a query to google big query dataset
+        get_dataset Function - Enters a query to google big query dataset
         Return - dataframe that contains java related posts
         """
         safe_config = bigquery.QueryJobConfig(maximum_bytes_billed=40 ** 10)
