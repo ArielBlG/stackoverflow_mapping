@@ -29,17 +29,32 @@ class ParserToMap:
         self._body_mapping = body_mapping
         self._answer_mapping = answer_mapping
         self.current_answer = 0
+        self.words = []
 
     def initiate(self):
         """
         initiate Function - initiate the mapping, calls the parser and creates a map, uploads it to cloud
         """
         for query in self.data_frame_iterator():
+            if not query.sub_classes:
+                continue
             mapped_code = self._MapCreator.MapCreator(query).create_dictionary(query)
-            json_name = '(' + str(query.score) + ')' + query.query + str(self.current_answer) + ".json"
+            # json_name = '(' + str(query.score) + ')' + query.query + str(self.current_answer) + ".json"
+            query_name = query.query.replace("/", "")
+            # json_name = query_name + "/" + '(' + str(query.score) + ')' + str(self.current_answer) + ".json"
             json_file = json.dumps(mapped_code)
-            # upload_blob("how_to_json", json_file, json_name)
+            # upload_blob("new_how_to_json2", json_file, json_name)
+            json_name = query_name + str(self.current_answer) + ".json"
 
+            path = dirname(dirname(__file__)) + "/json_maps/" + json_name
+            # file = open(path, 'w+')
+            # file.write(json_file)
+            # file.close()
+            # # print("ok")
+
+            # if query.query == "How to sort alphabetically while ignoring case sensitive?":
+            #     with open('result.json', 'w') as fp:
+            #         json.dump(mapped_code, fp)
             # print(json_name)
 
     def data_frame_iterator(self):
@@ -61,19 +76,21 @@ class ParserToMap:
         """
         current_query = self._CodeWrapper.CodeWrapper(title, body_dict[0])  # create the query
         # current_query.set_code(body_dict[1])  # add post code to query
-        current_query.add_tags(body_dict[2])  # add post tags to query
-        current_query.add_id(body_dict[3])
+
+        current_query.set_tags(body_dict[2])  # add post tags to query
+        current_query.set_id(body_dict[3])
+
         """handle url"""
         new_url = "https://stackoverflow.com/questions/" + str(body_dict[3]) + "/"
         title_url = title.replace(" ", "-")
         new_url += title_url
-        current_query.find_url(new_url)
+        current_query.set_url(new_url)
         self._codeParser.parse_post(body_dict, current_query)  # TODO: check if query update worked
 
         for answer_body_dict in self._answer_mapping[title]:
             copy_query = copy.deepcopy(current_query)  # creates new query instance
             copy_query.add_answer_text(answer_body_dict[0])
-            copy_query.add_score(answer_body_dict[2])
+            copy_query.set_score(answer_body_dict[2])
 
             if self._codeParser.parse_answer(answer_body_dict, copy_query):
                 yield copy_query

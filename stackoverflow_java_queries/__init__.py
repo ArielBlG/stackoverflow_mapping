@@ -12,7 +12,10 @@ from enum import Enum
 from javalang import tree
 # import javac_parser
 import copy
-
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from CodeMapping import stokenizer
+stop_words = set(stopwords.words('english'))
 
 class Errors(Enum):
     FAILED_PARSING = 1
@@ -47,6 +50,8 @@ class codeExtractor:
             self.answer_mapping = {}
         else:
             self.data = pd.read_csv(path)
+        self.words = []
+        self.all_text = []
 
     def extractCodes(self):
         """
@@ -92,7 +97,16 @@ class codeExtractor:
         code = []
         for curr_text in re.findall(r"<p>(.*?)</p>", post, flags=re.DOTALL):  # extract the text
             text += curr_text
+            text = re.sub("<code>(.*?)</code>", '', text)
+            text = text.replace('&gt;', '>')
+            text = text.replace('&lt;', '<')
+            text = text.replace('&amp;&amp;', '&&')
+            text = text.replace('&amp;', '&')
+            text = text.replace('&quot;', '"')
+            # word_tokens = word_tokenize(text)
 
+            # self.words += [w for w in word_tokens if not w in stop_words]
+            self.all_text.append(text)
         row = re.sub('<p>.*?</p>', '', post)  # remove the text
 
         for curr_code in re.findall(r"<code>(.*?)</code>", row, flags=re.DOTALL):  # extract the code
@@ -102,7 +116,9 @@ class codeExtractor:
             curr_code = curr_code.replace('&amp;&amp;', '&&')
             curr_code = curr_code.replace('&amp;', '&')
             curr_code = curr_code.replace('&quot;', '"')
+            curr_code = curr_code.replace('[...]', '')  # TODO: TEST IF WORKING
             curr_code = curr_code.replace('...', '/** ...*/')
+
             code.append(curr_code)
 
         for index in range(len(code)):
@@ -283,6 +299,7 @@ class codeParser:
             line = line.replace('\n', '')
             self.java_util_method.append(line)
         fin.close()
+        self.system_methods = []
 
     def parse_code_new(self):
         """
@@ -294,7 +311,7 @@ class codeParser:
         for title, body_dict in self.body_mapping.items():
             current_query = CodeWrapper.CodeWrapper(title, body_dict[0])  # create the query
             current_query.set_code(body_dict[1])  # add post code to query
-            current_query.add_tags(body_dict[2])  # add post tags to query
+            current_query.set_tags(body_dict[2])  # add post tags to query
             # current_query.find_url() # TODO: fix the url
 
             self.mapped_code[title] = []
@@ -306,7 +323,7 @@ class codeParser:
             for answer_body_dict in self.answer_mapping[title]:
                 copy_query = copy.deepcopy(current_query)
                 copy_query.add_answer_text(answer_body_dict[0])
-                copy_query.add_score(answer_body_dict[2])
+                copy_query.set_score(answer_body_dict[2])
                 copy_query.code_changed = False
 
                 self.parsing_error = Errors.FAILED_PARSING
@@ -328,8 +345,10 @@ class codeParser:
 
     def parse_post(self, body_dict, current_query):
         self.current_parsed = "Post"
-        for code in body_dict[1]:
-            self.code_parser_class(code, current_query)
+        self.code_parser_class(body_dict, current_query)
+        # for code in body_dict[1]:
+        #     self.code_parser_class(code, current_query)
+        return current_query
 
     def parse_answer(self, answer_body_dict, copy_query):
         self.parsing_error = Errors.FAILED_PARSING
@@ -355,9 +374,17 @@ class codeParser:
             if tree.imports:
                 self.handle_imports(tree.imports, current_query)
             for class_extract in tree.types:
-                self.extractor_class(class_extract, current_query, parser_token_list)
+                """adds the calls name and create task object"""
+                current_class = current_query.get_class(class_extract.name)  # checks if the class is already mapped
+
+                if current_class is None:
+                    current_class = CodeWrapper.ClassTask(class_extract.name)
+                    current_query.add_class(current_class)
+                self.extractor_class(class_extract, current_query, parser_token_list, current_class)
 
         except (javalang.parser.JavaParserBaseException, javalang.tokenizer.LexerError, TypeError, StopIteration) as e:
+            print(e)
+            print("***********EXPECTION*********")
             self.code_parser_method(code, current_query)
 
             """calls java syntax error detect"""
@@ -366,23 +393,14 @@ class codeParser:
             # else:
             #     return
 
-    def extractor_class(self, class_extract, current_query, parser_token_list):
+    def extractor_class(self, class_extract, current_query, parser_token_list, current_class):
         """
         extractor_class Function - extracts everything from the class
+        :param current_class:
         :param class_extract:
         :param current_query:
         :param parser_token_list:
         """
-
-        """adds the calls name and create task object"""
-        current_class = current_query.get_class(class_extract.name)  # checks if the class is already mapped
-
-        if current_class is None:
-            current_class = CodeWrapper.ClassTask(class_extract.name)
-            current_query.add_class(current_class)
-
-        # current_class.set_code(extract_specific_code(class_extract.position, parser_token_list, current_class,
-        #                                              current_query, modifiers=class_extract.modifiers))
 
         """adds the class annotation"""
         # if class_extract.annotations is not None:
@@ -462,10 +480,10 @@ class codeParser:
         if class_extract is not None:
             for children in class_extract.body:
                 if isinstance(children, javalang.tree.ClassDeclaration):
-                    self.extractor_class(children, current_query, parser_token_list)
-                    new_sub_class = current_query.get_class(children.name)
-                    if new_sub_class is not None:
-                        current_class.add_sub_class(new_sub_class)
+                    new_class_to_add = CodeWrapper.ClassTask(children.name)
+
+                    self.extractor_class(children, current_query, parser_token_list, new_class_to_add)
+                    current_class.add_sub_class(new_class_to_add)
 
         """handle method function calls"""
         # TODO: problem in method calls
@@ -550,6 +568,9 @@ class codeParser:
         elif isinstance(expression, javalang.tree.Cast):
             # raise Exception("not implemented invocations expression")
             if isinstance(expression.expression, javalang.tree.Expression):
+                if isinstance(expression.expression, javalang.tree.MethodInvocation):
+                    if expression.expression.qualifier is "":
+                        expression.expression.qualifier = expression.type.name
                 self.handle_method_expressions(expression.expression, method, current_query, current_method,
                                                parser_token_list)
             else:
@@ -787,9 +808,13 @@ class codeParser:
                 #         current_method.add_method_calls(called_method)
                 #         return  # TODO: change to normal if
             # TODO: be careful!
-            called_method = CodeWrapper.MethodTask(expression.member, call_qualifier)
-            if called_method not in current_method.calling_methods:
-                current_method.add_method_calls(called_method)
+            if call_qualifier not in current_query.imports:
+                new_class_add = CodeWrapper.ClassTask(call_qualifier)
+                called_method = CodeWrapper.MethodTask(expression.member, new_class_add)
+                new_class_add.add_class_methods(called_method)
+                current_query.add_class(new_class_add)
+                if called_method not in current_method.calling_methods:
+                    current_method.add_method_calls(called_method)
         else:
             if expression.member == current_method.method_name:
                 if current_method not in current_method.calling_methods:
@@ -801,10 +826,17 @@ class codeParser:
                         current_method.add_method_calls(called_method)
                 else:
                     # TODO: be careful!
-                    called_method = CodeWrapper.MethodTask(expression.member, current_method.get_method_super_class())
-                    if called_method not in current_method.calling_methods:
-                        current_method.add_method_calls(called_method)
-                    current_method.get_method_super_class().add_class_methods(called_method)
+                    if expression.member not in current_query.imports:
+                        new_class_task = current_query.get_class("unknown_class")
+                        if new_class_task is None:
+                            new_class_task = CodeWrapper.ClassTask("unknown_class")
+                            current_query.add_class(new_class_task)
+                        called_method = CodeWrapper.MethodTask(expression.member, new_class_task)
+                        new_class_task.add_class_methods(called_method)
+
+                        if called_method not in current_method.calling_methods:
+                            current_method.add_method_calls(called_method)
+                    # current_method.get_method_super_class().add_class_methods(called_method)
 
     def handle_super_method_calls(self, expression, method, current_query, current_method):
         """
@@ -972,7 +1004,9 @@ class codeParser:
             raise Exception("not implemented local variable decelerator")
         # ClassDeclaration
         elif isinstance(declarations, javalang.tree.ClassDeclaration):
-            self.extractor_class(declarations, current_query, parser_token_list)
+            current_class = CodeWrapper.ClassTask(declarations.name)
+            current_query.add_class(current_class)
+            self.extractor_class(declarations, current_query, parser_token_list, current_class)
         else:
             raise Exception("undefined decelerators")
 
@@ -1030,7 +1064,11 @@ class codeParser:
             return
         """ handles wrong class declaration """
         if isinstance(method, javalang.tree.ClassDeclaration) or isinstance(method, javalang.tree.InterfaceDeclaration):
-            self.extractor_class(method, current_query, parser_token_list)
+            new_class_to_add = current_query.get_class(method.name)
+            if new_class_to_add is None:
+                new_class_to_add = CodeWrapper.ClassTask(method.name)
+                current_query.add_class(new_class_to_add)
+            self.extractor_class(method, current_query, parser_token_list, new_class_to_add)
 
             """ handles single field declaration """
         elif isinstance(method, javalang.tree.FieldDeclaration):
@@ -1063,15 +1101,36 @@ class codeParser:
                         else:
                             self.unknown_methods[current_query.query] = []
                             self.unknown_methods[current_query.query].append(method.name)
+                        current_class = CodeWrapper.ClassTask("unknown_class_post")
+                        current_query.add_class(current_class)
+                        current_method = CodeWrapper.MethodTask(method.name, current_class)
+                        current_class.add_class_methods(current_method)
+                        current_query.add_methods(current_method)
                         return
 
                 """handle methods"""
                 # self.extractor_method_class(current_method, current_query, method, parser_token_list, first_map=False)
             else:
-                # TODO: handle method posts
-                current_class = CodeWrapper.ClassTask("unknown")
-                current_method = CodeWrapper.MethodTask(method.name, current_class)
-                current_query.add_methods(current_method)
+
+                try:
+                    # TODO: test class wrapping
+                    test_class = "public class Unknown{\n" + code + "\n}"
+                    tree = javalang.parse.parse(test_class)
+                    parser_token_list = javalang.parser.Parser(
+                        javalang.tokenizer.tokenize(code)).tokens.list  # token array
+                    self.parsing_error = None
+                    if tree.imports:
+                        self.handle_imports(tree.imports, current_query)
+                    for class_extract in tree.types:
+                        self.extractor_class(class_extract, current_query, parser_token_list)
+                    return
+                except (javalang.parser.JavaParserBaseException, javalang.tokenizer.LexerError, TypeError,
+                        StopIteration) as e:
+                    current_class = CodeWrapper.ClassTask("unknown_class_post")
+                    current_query.add_class(current_class)
+                    current_method = CodeWrapper.MethodTask(method.name, current_class)
+                    current_class.add_class_methods(current_method)
+                    current_query.add_methods(current_method)
 
             """set the method code"""
             # current_method.set_code(extract_specific_code(method.position, parser_token_list, current_method,
@@ -1113,7 +1172,20 @@ class codeParser:
         #     for annotation in method.annotations:
         #         current_method.code = extract_att_code(annotation.position, parser_token_list, current_query) + \
         #                               current_method.code
-
+        """adds the method params"""
+        if method.parameters is not None:
+            for param in method.parameters:
+                if isinstance(param, javalang.tree.FormalParameter):
+                    new_param = param.name
+                    if isinstance(param.type, javalang.tree.ReferenceType) or \
+                            isinstance(param.type, javalang.tree.BasicType):
+                        new_param = param.type.name + " " + new_param
+                    else:
+                        raise Exception("not referencedType")
+                    if new_param not in current_method.params:
+                        current_method.params.append(new_param)
+                else:
+                    raise Exception("not formal parameters")
         """adds the method comments"""
         if method.documentation is not None:
             if isinstance(method.documentation, list):
@@ -1262,7 +1334,8 @@ class codeParser:
             implement_class_new = CodeWrapper.ClassTask(implement_class.name)
             current_query.add_class(implement_class_new)
 
-        current_class.add_implement_class(implement_class_new)
+        if implement_class_new not in current_class.Implements:
+            current_class.add_implement_class(implement_class_new)
 
     def add_extended_class(self, current_query, extended_class, current_class):
         """

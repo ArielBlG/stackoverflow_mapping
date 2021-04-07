@@ -1,5 +1,7 @@
 import stackoverflow_java_queries
-#from googlesearch import search
+
+
+# from googlesearch import search
 
 
 class Task:
@@ -13,47 +15,6 @@ class Task:
         self.documentation = ""
         self.code = None
         self.code_changed = False
-        self.imports = []
-        self.imports_codes = []
-        self.tags = []
-        self.score = None
-        self.post_id = None
-
-    def add_id(self, post_id):
-        """
-        add_id Function - adds the post id
-        :param post_id:
-        """
-        self.post_id = post_id
-
-    def add_tags(self, tags):
-        """
-        add_tags Function - adds the query tags to the map
-        :param tags:
-        """
-        self.tags = tags
-
-    def add_score(self, score):
-        """
-        add_score Function - adds the score to the map
-        :param score:
-        """
-        self.score = score
-
-    def add_imports_code(self, _import):
-        """
-        add_imports_code Function - adds code imports codes to the class
-        :param _import:
-        """
-        self.imports_codes.append(_import)
-
-    def add_imports(self, _import):
-        """
-        add_imports Function - adds code imports to the class
-        :param _import:
-        :return:
-        """
-        self.imports.append(_import)
 
     def changed_code(self):
         """
@@ -61,14 +22,12 @@ class Task:
         """
         self.code_changed = True
 
-    def set_code(self, code):
+    def get_key(self):
         """
-        set_code Function - sets the task's code
-        :param code:
+        get_key Function - returns the task's key
+        :return:
         """
-        if self.code is not None:
-            self.code_changed = True
-        self.code = code
+        return self.key
 
     def set_documentation(self, documentation):
         """
@@ -86,12 +45,14 @@ class Task:
         """
         self.key = key
 
-    def get_key(self):
+    def set_code(self, code):
         """
-        get_key Function - returns the task's key
-        :return:
+        set_code Function - sets the task's code
+        :param code:
         """
-        return self.key
+        if self.code is not None:
+            self.code_changed = True
+        self.code = code
 
 
 # ------------------------------------------------------------------------------
@@ -107,40 +68,11 @@ class CodeWrapper(Task):
         self.sub_classes = []
         self.url = None
         self.methods = []
-
-    def add_answer_text(self, answer_text):
-        """
-        add_answer_text Function - adds the answer text to the query
-        :param answer_text:
-        """
-        self.text += answer_text
-
-    def add_methods(self, method):
-        """
-        add_methods Function - creates methods list to find simple codes
-        :param method:
-        """
-        self.methods.append(method)
-
-    def get_methods(self, method_name):
-        """
-        get_methods Function - find if a method exists
-        :param method_name:
-        :return: list of methods
-        """
-        # TODO: handle two functions from same name
-        return next((x for x in self.methods if x.get_method_name() == method_name), None)
-
-    def find_url(self, url):
-        # TODO: to fix function
-        self.url = url
-
-    def add_class(self, task):
-        """
-        add_class Function - adds a class to the current query
-        :param task:
-        """
-        self.sub_classes.append(task)
+        self.imports = []
+        self.imports_codes = []
+        self.tags = []
+        self.score = None
+        self.post_id = None
 
     def __eq__(self, other):
         """
@@ -151,6 +83,31 @@ class CodeWrapper(Task):
         if self.query == other.query:
             return True
         return False
+
+    def set_id(self, post_id):
+        """
+        add_id Function - adds the post id
+        :param post_id:
+        """
+        self.post_id = post_id
+
+    def set_tags(self, tags):
+        """
+        add_tags Function - adds the query tags to the map
+        :param tags:
+        """
+        self.tags = tags
+
+    def set_score(self, score):
+        """
+        add_score Function - adds the score to the map
+        :param score:
+        """
+        self.score = score
+
+    def set_url(self, url):
+        # TODO: to fix function
+        self.url = url
 
     def get_queries_class(self):
         """
@@ -173,6 +130,51 @@ class CodeWrapper(Task):
                     return curr_class
         return None
 
+    def get_methods(self, method_name):
+        """
+        get_methods Function - find if a method exists
+        :param method_name:
+        :return: list of methods
+        """
+        # TODO: handle two functions from same name
+        return next((x for x in self.methods if x.get_method_name() == method_name), None)
+
+    def add_imports(self, _import):
+        """
+        add_imports Function - adds code imports to the class
+        :param _import:
+        :return:
+        """
+        self.imports.append(_import)
+
+    def add_answer_text(self, answer_text):
+        """
+        add_answer_text Function - adds the answer text to the query
+        :param answer_text:
+        """
+        self.text += answer_text
+
+    def add_methods(self, method):
+        """
+        add_methods Function - creates methods list to find simple codes
+        :param method:
+        """
+        self.methods.append(method)
+
+    def add_class(self, task):
+        """
+        add_class Function - adds a class to the current query
+        :param task:
+        """
+        self.sub_classes.append(task)
+
+    def add_imports_code(self, _import):
+        """
+        add_imports_code Function - adds code imports codes to the class
+        :param _import:
+        """
+        self.imports_codes.append(_import)
+
 
 # ------------------------------------------------------------------------------
 
@@ -192,6 +194,19 @@ class ClassTask(Task):
         self.Constructors = []
         self.sub_classes = []
         self.Enums = []
+
+    def get_class_atts_names(self):
+        """
+
+        :return:
+        """
+        att_names = []
+        for att in self.Attributes:
+            curr_att_dec = att.name
+            if att.att_type is not None and att.att_type.class_name is not None:
+                curr_att_dec = att.att_type.class_name + " " + curr_att_dec
+            att_names.append(curr_att_dec)
+        return att_names
 
     def add_sub_class(self, sub_class):
         """
@@ -372,6 +387,7 @@ class MethodTask(Task):
         self.method_name = method_name
         self.calling_methods = []
         self.method_token = None
+        self.params = []
 
     def add_method_calls(self, method):
         """
