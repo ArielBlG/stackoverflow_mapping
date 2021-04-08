@@ -1,3 +1,4 @@
+import json
 import re
 
 import pandas as pd
@@ -119,19 +120,24 @@ def Main2():
     counter = 0
     for path in pathlist:
         # because path is object not string
-        text = ""
+        # text = ""
         path_in_str = str(path)
         if path_in_str.split('/')[-1].split('.')[0] in non_working_files:
             continue
         # print(path_in_str)
         with open(path_in_str, "r") as f:
-            # print(filename)
+            # print(path_in_str)
             text += f.read()
             text = re.sub("package(.*?);", '', text)
             text = re.sub("import(.*?);", '', text)
-            current_query = CodeWrapper.CodeWrapper("test", "test")
-            code_parser.parse_post(text, current_query)
-        counter += 1
+    current_query = CodeWrapper.CodeWrapper("test", "test")
+    mapped_code = code_parser.parse_post(text, current_query)
+    counter += 1
+    map_code = MapCreator.MapCreator(mapped_code)
+    task_dict = map_code.create_dictionary(current_query)
+    with open("apache_map.json", 'w') as fp:
+        json.dump(task_dict, fp)
+    print(task_dict)
 
     # text = re.sub("package(.*?);", '', text)
     # text = re.sub("import(.*?);", '', text)
