@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import re
 
+from CodeMapping import stackoverflow_java_queries
 from CodeMapping.CodeWrapper import CodeWrapper
 from CodeMapping.MapCreator import MapCreator
 
@@ -32,13 +33,13 @@ non_working_files = ["module-info", "TestNotesText", "TestRichTextRun", "TestNam
                      "TestHSSFSheetUpdateArrayFormulas", "TestXSLFChart", "XMLSlideShow"]
 
 class CodeFromFile:
-    def __init__(self, file_path, code_parser, name='test', output_path=""):
+    def __init__(self, file_path, name='test', output_path=""):
         self.file_path = file_path
         self.directory = os.fsencode(self.file_path)
-        self.code_parser = code_parser
         self.name = name
         self.output_path = output_path
         self.full_code_text = ""
+        self.code_parser = stackoverflow_java_queries.codeParser()
 
     def concat_files(self):
         pathlist = Path(self.file_path).glob('**/*.java')
@@ -55,11 +56,12 @@ class CodeFromFile:
                 self.full_code_text = re.sub("import(.*?);", '', self.full_code_text)
 
                 # code_parser.parse_post(text, current_query)
+                self.create_parse_and_map()
 
     def create_parse_and_map(self):
-        current_query = CodeWrapper.CodeWrapper(self.name, self.name)
+        current_query = CodeWrapper(self.name, self.name)
         mapped_code = self.code_parser.parse_post(self.full_code_text, current_query)
-        map_code = MapCreator.MapCreator(mapped_code)
+        map_code = MapCreator(mapped_code)
         task_dict = map_code.create_dictionary(current_query)
         if not self.output_path:
             self.output_path = "output_json.json"

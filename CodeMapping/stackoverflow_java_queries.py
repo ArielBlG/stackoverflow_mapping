@@ -316,7 +316,6 @@ class codeParser:
 
             self.mapped_code[title] = []
             self.current_parsed = "Post"
-            print(body_dict)
             for code in body_dict[1]:
                 self.code_parser_class(code, current_query)
 
@@ -346,9 +345,9 @@ class codeParser:
 
     def parse_post(self, body_dict, current_query):
         self.current_parsed = "Post"
-        # self.code_parser_class(body_dict, current_query)
-        for code in body_dict[1]:
-            self.code_parser_class(code, current_query)
+        self.code_parser_class(body_dict, current_query)
+        # for code in body_dict[1]:
+        #     self.code_parser_class(code, current_query)
         return current_query
 
     def parse_answer(self, answer_body_dict, copy_query):
@@ -381,7 +380,6 @@ class codeParser:
                 if current_class is None:
                     current_class = CodeWrapper.ClassTask(class_extract.name)
                     current_query.add_class(current_class)
-                print("WORKED")
                 self.extractor_class(class_extract, current_query, parser_token_list, current_class)
 
         except (javalang.parser.JavaParserBaseException, javalang.tokenizer.LexerError, TypeError, StopIteration) as e:
@@ -1063,7 +1061,7 @@ class codeParser:
             #print(e)
             #print(current_query.query)
             # self.parsing_error = Errors.FAILED_PARSING
-            # raise  Exception("Failed parsing ")
+            raise  Exception("Failed parsing ")
             return
         """ handles wrong class declaration """
         if isinstance(method, javalang.tree.ClassDeclaration) or isinstance(method, javalang.tree.InterfaceDeclaration):
@@ -1153,6 +1151,7 @@ class codeParser:
                 if isinstance(enum_body, javalang.tree.EnumConstantDeclaration):
                     enum_task.add_enum_const(enum_body.name)
         else:
+            print('of')
             raise Exception("undefined")
 
 

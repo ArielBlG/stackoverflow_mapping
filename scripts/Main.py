@@ -1,16 +1,25 @@
 import json
 import re
-
+import os
+import sys
+import inspect
+from pathlib import Path
+file_path = Path(os.getcwd())
+sys.path.append(str(file_path.parent.absolute()) + '/')
 import pandas as pd
-import stackoverflow_java_queries
+from CodeMapping import stackoverflow_java_queries
 from CodeMapping import MapCreator, ParserToMap, CodeWrapper
+from CodeMapping.CodeFromFile import CodeFromFile
 from TextMapping import ExtractText
 from collections import namedtuple
 from os.path import dirname, join
-import os
-from pathlib import Path
+
+
+
 import psutil
 import time
+
+from CodeMapping import BigQuery
 
 temp_dir = dirname(dirname(__file__))
 CRED_FILENAME = join(temp_dir, 'Cred.json')
@@ -38,6 +47,18 @@ non_working_files = ["module-info", "TestNotesText", "TestRichTextRun", "TestNam
                      "TestXSSFImportFromXML", "TestXSSFDataValidationConstraint", "TestXSSFDrawing", "TestXSLFNotes",
                      "TestXSLFSlide", "TestXSLFPictureShape", "BarChartDemo", "TestHSSFEventFactory",
                      "TestHSSFSheetUpdateArrayFormulas", "TestXSLFChart", "XMLSlideShow"]
+non_working_files_luence = ['TestBKD', 'BaseXYShapeTestCase', 'BaseLatLonShapeTestCase', 'BaseLatLonPointTestCase',
+                            'BaseLatLonDocValueTestCase', 'BaseLatLonSpatialTestCase', 'TestIndexWriter',
+                            'TestFieldReuse', 'TestDirectory', 'PerFieldPostingsFormat', 'QueryBuilder',
+                            'GraphTokenStreamFiniteStrings', 'ExactPhraseMatcher', 'BlendedTermQuery', 'SynonymQuery',
+                            'DisjunctionScoreBlockBoundaryPropagator', 'IndexUpgrader', 'IndexingChain', 'MergePolicy',
+                            'ByteBuffersDataInput', 'ByteBuffersDirectory', 'TableUtils', 'PresetAnalyzerPanelProvider',
+                            'CustomAnalyzerPanelProvider', 'QueryParserPaneProvider', 'SortPaneProvider',
+                            'AnalysisChainDialogFactory', 'DocValuesDialogFactory', 'IndexOptionsDialogFactory',
+                            'SubtypeCollector', 'ClassScanner', 'TestOpenNLPChunkerFilterFactory',
+                            'TestOpenNLPPOSFilterFactory', 'TestMemoryIndex', 'CommonTermsQuery', 'LuceneTestCase',
+                            'VerifyTestClassNamingConvention', 'BaseDirectoryTestCase', 'CombinedFieldQuery',
+                            'OffsetsFromPositions', 'PassageSelector', 'UnifiedHighlighter', 'MissingDoclet']
 
 def Main():
     # ext_txt = ExtractText.ExtractText()
@@ -109,14 +130,21 @@ def Main():
     # metadata.create_meta_model()
 
 
+
 def Main2():
-    # directory_in_str = "/Users/ariel-pc/Desktop/Package/src/java/org/apache/poi/util/"
-    directory_in_str = "/Users/ariel-pc/Desktop/Package/src/"
+    directory_in_str = "/Users/ariel-pc/Desktop/Package/src"
+    # directory_in_str = "/Users/ariel-pc/Desktop/Package/MaximGit/System"
+    # directory_in_str = "/Users/ariel-pc/Desktop/Package/lucene-main"
+    # directory_in_str = "/Users/ariel-pc/Desktop/Package/src/java/org/apache/poi/ss/usermodel/"
+    # directory_in_str = "/Users/ariel-pc/Desktop/Package/lucene-main/lucene/benchmark/src/java/org/apache/lucene/benchmark/byTask/utils/Algorithm.java"
+    # directory_in_str = "/Users/ariel-pc/Desktop/Package/lucene-main/lucene/core/src/test/org/apache/lucene/document/BaseXYShapeTestCase.java"
 
     directory = os.fsencode(directory_in_str)
     code_parser = stackoverflow_java_queries.codeParser()
     text = ""
     pathlist = Path(directory_in_str).glob('**/*.java')
+    # pathlist = [directory_in_str]
+    non_working = []
     counter = 0
     for path in pathlist:
         # because path is object not string
@@ -126,55 +154,39 @@ def Main2():
             continue
         # print(path_in_str)
         with open(path_in_str, "r") as f:
-            # print(path_in_str)
+            print(path_in_str)
             text += f.read()
             text = re.sub("package(.*?);", '', text)
             text = re.sub("import(.*?);", '', text)
-    current_query = CodeWrapper.CodeWrapper("test", "test")
+            # try:
+            #     current_query = CodeWrapper.CodeWrapper("test", "test")
+            #     mapped_code = code_parser.parse_post(text, current_query)
+            # except:
+            #     print(path_in_str.split('/')[-1].split('.')[0])
+            #     non_working.append(path_in_str.split('/')[-1].split('.')[0])
+            #     continue
+    current_query = CodeWrapper.CodeWrapper("Lucene", "Lucene")
     mapped_code = code_parser.parse_post(text, current_query)
-    counter += 1
+    for temp_class in mapped_code.sub_classes:
+        counter += 1
+    print(counter)
+    # print(non_working)
     map_code = MapCreator.MapCreator(mapped_code)
     task_dict = map_code.create_dictionary(current_query)
-    with open("apache_map.json", 'w') as fp:
+    with open("poi_map.json", 'w') as fp:
         json.dump(task_dict, fp)
-    print(task_dict)
+    # print(task_dict)
 
-    # text = re.sub("package(.*?);", '', text)
-    # text = re.sub("import(.*?);", '', text)
-    # current_query = CodeWrapper.CodeWrapper("test", "test")
-    # mapped_code = code_parser.parse_post(text, current_query)
-    # map_code = MapCreator.MapCreator(mapped_code)
-    # task_dict = map_code.create_dictionary(current_query)
-    # print(task_dict)
-    # for file in os.listdir(directory):
-    #     filename = os.fsdecode(file)
-    #     if filename.endswith(".java"):
-    #         # text = ""
-    #         with open(directory_in_str + filename, "r") as f:
-    #             # print(filename)
-    #             text += f.read()
-    #             # text = f.read()
-    #             # current_query = CodeWrapper.CodeWrapper("test", "test")
-    #             # code_parser.parse_post(text, current_query)
-    #         # print(os.path.join(directory, filename))
-    #         continue
-    #     else:
-    #         continue
-    #
-    # # df = pd.DataFrame(columns=['title', 'code'])
-    # text = re.sub("package(.*?);", '', text)
-    # text = re.sub("import(.*?);", '', text)
-    # current_query = CodeWrapper.CodeWrapper("test", "test")
-    # mapped_code = code_parser.parse_post(text, current_query)
-    # map_code = MapCreator.MapCreator(mapped_code)
-    # task_dict = map_code.create_dictionary(current_query)
-    # print(task_dict)
+
 
 
 if __name__ == "__main__":
-    Main2()
-    # start_time = time.time()
-    # Main()
-    # print("--- %s seconds ---" % (time.time() - start_time))
-    # process = psutil.Process(os.getpid())
-    # print(str(process.memory_info().rss) + " Bytes")
+    # Main2()
+    if sys.argv[1] == "B":
+        big_query = BigQuery.BigQuery()
+        big_query.execute()
+    elif sys.argv[1] == "F":
+        # F /Users/ariel-pc/Desktop/Package/src/java/org/apache/poi/ss/usermodel/ test /Users/ariel-pc/Desktop/Package/testoutput.json
+        code_from_file = CodeFromFile(file_path=sys.argv[2], name=sys.argv[3], output_path=sys.argv[4])
+        code_from_file.concat_files()
+

@@ -47,9 +47,9 @@ class ParserToMap:
             json_name = query_name + str(self.current_answer) + ".json"
 
             path = dirname(dirname(__file__)) + "/json_maps/" + json_name
-            # file = open(path, 'w+')
-            # file.write(json_file)
-            # file.close()
+            file = open(path, 'w+')
+            file.write(json_file)
+            file.close()
             # # print("ok")
 
             # if query.query == "How to sort alphabetically while ignoring case sensitive?":
