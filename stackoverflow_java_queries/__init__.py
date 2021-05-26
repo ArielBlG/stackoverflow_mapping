@@ -386,7 +386,7 @@ class codeParser:
 
         except (javalang.parser.JavaParserBaseException, javalang.tokenizer.LexerError, TypeError, StopIteration) as e:
             print(e)
-            print("***********EXCEPTION IN FILE*********")
+
             self.code_parser_method(code, current_query)
 
             """calls java syntax error detect"""
@@ -1060,6 +1060,7 @@ class codeParser:
             parser_token_list = parser.tokens.list
             self.parsing_error = None
         except (javalang.parser.JavaParserBaseException, javalang.tokenizer.LexerError, TypeError, StopIteration) as e:
+            print("***********EXCEPTION IN FILE*********")
             #print(e)
             #print(current_query.query)
             # self.parsing_error = Errors.FAILED_PARSING
@@ -1069,6 +1070,8 @@ class codeParser:
         if isinstance(method, javalang.tree.ClassDeclaration) or isinstance(method, javalang.tree.InterfaceDeclaration):
             new_class_to_add = current_query.get_class(method.name)
             if new_class_to_add is None:
+                if method.name == "workbook":
+                    print("a")
                 new_class_to_add = CodeWrapper.ClassTask(method.name)
                 current_query.add_class(new_class_to_add)
             self.extractor_class(method, current_query, parser_token_list, new_class_to_add)

@@ -135,7 +135,7 @@ class MapCreator:
         """ extract the class  """
         key, full_task_dict = self.create_class_task(task, full_task_dict, key, query_key)
 
-        return self.task_dict(task, key, full_task_dict)
+        return self.task_dict(task, key, full_task_dict, flag=False)
 
     def task_dict(self, task, key, full_task_dict, **kwargs):
         if kwargs.get("flag"):
@@ -159,6 +159,8 @@ class MapCreator:
         """ extract the class's methods  """
         if not flag:
             for sub_class in task.sub_classes:
+                if sub_class.class_name == "Workbook":
+                    print("a")
                 key, full_task_dict = self.create_method_tasks(sub_class, full_task_dict, key)
         else:
             key, full_task_dict = self.create_method_tasks(task, full_task_dict, key)

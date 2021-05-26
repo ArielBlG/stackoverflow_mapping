@@ -67,3 +67,20 @@ class CodeFromFile:
             self.output_path = "output_json.json"
         with open(self.output_path, 'w') as fp:
             json.dump(task_dict, fp)
+
+
+    def test_new_file(self):
+        pathlist = Path(self.file_path).glob('**/*.java')
+        for path in pathlist:
+            # because path is object not string
+            path_in_str = str(path)
+            print(path_in_str)
+            self.full_code_text = ""
+            with open(path_in_str, "r") as f:
+                print(path_in_str.split('/')[-1].split('.')[0])
+                self.full_code_text += f.read()
+                self.full_code_text = re.sub("package(.*?);", '', self.full_code_text)
+                self.full_code_text = re.sub("import(.*?);", '', self.full_code_text)
+
+            current_query = CodeWrapper(self.name, self.name)
+            mapped_code = self.code_parser.parse_post(self.full_code_text, current_query)

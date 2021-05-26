@@ -808,13 +808,15 @@ class codeParser:
                 #         current_method.add_method_calls(called_method)
                 #         return  # TODO: change to normal if
             # TODO: be careful!
-            if call_qualifier not in current_query.imports:
-                new_class_add = CodeWrapper.ClassTask(call_qualifier)
-                called_method = CodeWrapper.MethodTask(expression.member, new_class_add)
-                new_class_add.add_class_methods(called_method)
-                current_query.add_class(new_class_add)
-                if called_method not in current_method.calling_methods:
-                    current_method.add_method_calls(called_method)
+            # if call_qualifier not in current_query.imports:
+            #     if call_qualifier == "workbook":
+            #         print("a")
+            #     new_class_add = CodeWrapper.ClassTask(call_qualifier)
+            #     called_method = CodeWrapper.MethodTask(expression.member, new_class_add)
+            #     new_class_add.add_class_methods(called_method)
+            #     current_query.add_class(new_class_add)
+            #     if called_method not in current_method.calling_methods:
+            #         current_method.add_method_calls(called_method)
         else:
             if expression.member == current_method.method_name:
                 if current_method not in current_method.calling_methods:
@@ -1061,7 +1063,8 @@ class codeParser:
             #print(e)
             #print(current_query.query)
             # self.parsing_error = Errors.FAILED_PARSING
-            raise  Exception("Failed parsing ")
+            # raise  Exception("Failed parsing ")
+            print("**********FAILED PARSING**********")
             return
         """ handles wrong class declaration """
         if isinstance(method, javalang.tree.ClassDeclaration) or isinstance(method, javalang.tree.InterfaceDeclaration):
